@@ -7,19 +7,19 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path: "/",
-    name: "Listen",
+    path: `/`,
+    name: `Listen`,
     component: Listen
   },
   {
-    path: "/configure",
-    name: "Configure",
+    path: `/configure`,
+    name: `Configure`,
     component: Configure
   }
 ];
 
 const router = new VueRouter({
-  mode: "history",
+  mode: `history`,
   base: process.env.BASE_URL,
   routes
 });

@@ -3,10 +3,10 @@ const baseSynthConfig = {
     oscillator: {},
     envelope: {
       attack: 2.0,
-      attackCurve: "linear",
+      attackCurve: `linear`,
       decay: 0.1,
       release: 8,
-      releaseCurve: "ripple",
+      releaseCurve: `ripple`,
       sustain: 0.4
     }
   },
@@ -14,14 +14,14 @@ const baseSynthConfig = {
     depth: 0.3,
     frequency: 3.1,
     spread: 180,
-    type: "sine",
+    type: `sine`,
     wet: 0
   },
   vibrato: {
     depth: 0.1,
     frequency: 3.1,
     maxDelay: 0.005,
-    type: "sine",
+    type: `sine`,
     wet: 0.3
   },
   phaser: {
@@ -43,7 +43,7 @@ const baseSynthConfig = {
     feedback: 0.1,
     frequency: 0.85,
     spread: 67,
-    type: "sine",
+    type: `sine`,
     wet: 0.1
   },
   EQ3: {
@@ -56,7 +56,7 @@ const baseSynthConfig = {
   },
   panner: {
     frequency: 1,
-    type: "sine",
+    type: `sine`,
     depth: 0.5
   },
   out: {
@@ -77,15 +77,15 @@ const baseSynthFollowerConfig = {
 const voiceConfig = {
   portamento: 0.2,
   osc: {
-    type: "pulse",
+    type: `pulse`,
     width: 0.5,
     detuneMin: -10,
     detuneMax: 10
   },
   env: {
-    attackCurve: "linear",
-    decayCurve: "linear",
-    releaseCurve: "linear"
+    attackCurve: `linear`,
+    decayCurve: `linear`,
+    releaseCurve: `linear`
   },
   noise: {
     playbackRate: 0.7,
@@ -100,8 +100,8 @@ const voiceConfig = {
 };
 const formantPresets = [
   {
-    name: "a",
-    type: "bass",
+    name: `a`,
+    type: `bass`,
     formants: [
       {
         frequency: 600,
@@ -131,8 +131,8 @@ const formantPresets = [
     ]
   },
   {
-    name: "e",
-    type: "bass",
+    name: `e`,
+    type: `bass`,
     formants: [
       {
         frequency: 400,
@@ -162,8 +162,8 @@ const formantPresets = [
     ]
   },
   {
-    name: "i",
-    type: "bass",
+    name: `i`,
+    type: `bass`,
     formants: [
       {
         frequency: 250,
@@ -193,8 +193,8 @@ const formantPresets = [
     ]
   },
   {
-    name: "o",
-    type: "bass",
+    name: `o`,
+    type: `bass`,
     formants: [
       {
         frequency: 400,
@@ -224,8 +224,8 @@ const formantPresets = [
     ]
   },
   {
-    name: "u",
-    type: "bass",
+    name: `u`,
+    type: `bass`,
     formants: [
       {
         frequency: 350,

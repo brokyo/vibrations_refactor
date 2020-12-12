@@ -66,24 +66,24 @@ class ChoirSection {
     // VOICE //
     ///////////
     this.voice = {};
-    this.voice.portamento = config.portamento;
+    this.voice.portamento = voiceConfig.portamento;
 
     // -- VOX -- //
-    this.voice.voxOut = new Tone.Gain(config.voxOut.gain);
+    this.voice.voxOut = new Tone.Gain(voiceConfig.voxOut.gain);
 
     this.voice.oscs = _.times(15, function() {
       return new Tone.OmniOscillator({
-        type: config.osc.type,
-        width: config.osc.width,
-        detune: _.random(config.osc.detuneMin, config.osc.detuneMax)
+        type: voiceConfig.osc.type,
+        width: voiceConfig.osc.width,
+        detune: _.random(voiceConfig.osc.detuneMin, voiceConfig.osc.detuneMax)
       }).start();
     });
 
     this.voice.envs = _.times(15, function() {
       return new Tone.AmplitudeEnvelope({
-        attackCurve: config.env.attackCurve,
-        decayCurve: config.env.decayCurve,
-        releaseCurve: config.env.releaseCurve
+        attackCurve: voiceConfig.env.attackCurve,
+        decayCurve: voiceConfig.env.decayCurve,
+        releaseCurve: voiceConfig.env.releaseCurve
       });
     });
 
@@ -94,8 +94,8 @@ class ChoirSection {
 
     // -- WHITE NOISE -- //
     this.voice.noise = new Tone.Noise({
-      playbackRate: config.noise.playbackRate,
-      volume: config.noise.volume
+      playbackRate: voiceConfig.noise.playbackRate,
+      volume: voiceConfig.noise.volume
     }).start();
 
     this.voice.noise.connect(this.voice.envs[0]);
@@ -105,18 +105,18 @@ class ChoirSection {
 
     this.voice.lfoNodes = _.times(5, function() {
       return new Tone.LFO({
-        type: "sine",
+        type: `sine`,
         min: 0,
         max: 1,
         phase: 0,
-        frequency: "4n",
+        frequency: `4n`,
         amplitude: 1
       }).start();
     });
 
     this.voice.formantNodes = _.times(5, function(index) {
       return new Tone.Filter({
-        type: "bandpass",
+        type: `bandpass`,
         rolloff: -24
       });
     });
@@ -141,7 +141,7 @@ class ChoirSection {
 
     // -- EFFECTS -- //
     this.voice.position = new Tone.Panner(0);
-    this.voice.lineOut = new Tone.Gain(config.lineOut.gain);
+    this.voice.lineOut = new Tone.Gain(voiceConfig.lineOut.gain);
 
     this.voice.formantOut.chain(this.voice.position, this.voice.lineOut);
   }
@@ -171,5 +171,5 @@ class ChoirSection {
 }
 
 let baseSynth = new BaseSynth(baseSynthConfig);
-let choirSection = new ChoirSection(voiceConfig)
-export { baseSynth, choirSection };
+
+export { baseSynth, ChoirSection };

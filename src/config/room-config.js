@@ -5,7 +5,7 @@ const roomConfig = {
   },
   tremolo: {
     frequency: 10,
-    type: "sine",
+    type: `sine`,
     depth: 0.5,
     spread: 180
   },
