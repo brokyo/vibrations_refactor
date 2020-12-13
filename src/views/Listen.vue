@@ -15,12 +15,18 @@ export default {
   data: function() {
     return {
       p5Meta: {
+        initialized: false,
+        configured: false,
         color: null
       },
       hueMeta: {
+        initialized: false,
+        configured: false,
         lightArray: []
       },
       toneMeta: {
+        initialized: false,
+        configured: false,
         baseToneEmitter: null,
         melodicToneEmitters: [],
         toneSpace: {}
@@ -42,28 +48,57 @@ export default {
   },
   methods: {
     //USER ACTIONS
-    enterSpace() {
-      initP5()
-      initHue()
-      initTone()
-
-      // then
-      configureP5()
-      configureHue()
-      configureTone()
-
-      // then
-      configureWave()
-      scheduleWave()
-
+    async enterSpace() {
+      // TODO: Error handling
+      let initialLibraryValues = await this.initLibraries();
+      console.log(initialLibraryValues);
+      // let configuredLibraryValues = await this.configureLibraries();
+      // let configuredWaveValues = await this.configureWave();
+      // let waveScheduled = await this.scheduleWave();
     },
     // MACHINE ACTIONS
-    initP5() {
-      import(`p5`).then(module => {
-        p5 = module.default;
-      });
+    async initLibraries() {
+      let visualsInitialized = await this.initP5();
+      let lightsInitialized = await this.initHue();
+      let soundInitialized = await this.initTone();
+
+      return await Promise.all([
+        visualsInitialized,
+        lightsInitialized,
+        soundInitialized
+      ]);
     },
-    configureP5() {
+    async initP5() {
+      p5 = await import(`p5`).then(module => {
+        return module.default;
+      });
+      this.p5Meta.initialized = true;
+
+      return true;
+    },
+    async initHue() {
+      this.hueMeta.integration = false;
+      this.hueMeta.lightArray = [{}, {}, {}];
+      this.hueMeta.initialized = true;
+
+      return true;
+    },
+    async initTone() {
+      Tone = await import(`tone`).then(module => {
+        return module.default;
+      });
+      this.toneMeta.initialized = true;
+
+      return true;
+    },
+    async configureLibraries() {
+      let visualsConfigured = this.configureP5();
+      let lightsConfigured = this.configureHue();
+      let soundConfigured = this.configureTone();
+
+      await Promise.all(visualsConfigured, lightsConfigured, soundConfigured);
+    },
+    async configureP5() {
       import(`@/modules/create-p5`).then(module => {
         let myp5 = new p5(module.s);
 
@@ -73,42 +108,31 @@ export default {
         myp5.waveMeta = this.waveMeta;
       });
     },
-    initHue() {
-      let lightArrayFound = false;
-      this.hueIntegration = lightArrayFound ? true : false;
-    },
-    configureHue() {
+    async configureHue() {
       // Hue logic here
+      let hueVals = false;
+      console.log(hueVals);
     },
-    initTone() {
-      import(`tone`).then(module => {
-        Tone = module.default;
-      });
-    },
-    configureTone() {
+    async configureTone() {
       // Get configured instruments
       import(`@/modules/toneEmitterGeneration.js`).then(module => {
-        
-        this.$_.times(lightArrayLength, i => {
+        this.$_.times(this.hueMeta.lightArray.length, i => {
+          console.log(i);
           this.melodicToneEmitters.push(module.createMelodicEmitter());
-        }
+        });
         this.baseEmitter = module.createBaseToneEmitter();
-        })
       });
 
       import(`@/modules/toneSpaceGeneration.js`).then(module => {
         this.toneSpace = module.createToneSpace();
       });
-
-
-      //then
-      connectTone() {
-        this.baseEmitter.out.connect(this.toneSpace.in);
-        this.melodicToneEmitters.forEach(emitter => {
-          emitter.out.connect(this.toneSpace.in);
-        })
-        this.toneSpace.out.connect(Tone.Master);
-      }
+    },
+    async connectTone() {
+      this.baseEmitter.out.connect(this.toneSpace.in);
+      this.melodicToneEmitters.forEach(emitter => {
+        emitter.out.connect(this.toneSpace.in);
+      });
+      this.toneSpace.out.connect(Tone.Master);
     },
     getNewUtterance() {
       // TODO: This import is probably more trouble than it's worth. Maybe look into persisting `this`?

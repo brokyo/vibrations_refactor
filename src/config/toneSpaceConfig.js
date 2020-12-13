@@ -1,4 +1,4 @@
-const roomConfig = {
+const spaceConfigDefaults = {
   reverb: {
     roomSize: 0.7,
     dampening: 2000
@@ -20,4 +20,4 @@ const roomConfig = {
   }
 };
 
-export { roomConfig };
+export { spaceConfigDefaults };
