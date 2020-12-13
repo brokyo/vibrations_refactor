@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 
 const s = sketch => {
   sketch.preload = () => {
-    // sketch.font = sketch.loadFont("/src/assets/Abel-Regular.ttf");
+    // sketch.font = sketch.loadFont("/assets/Abel-Regular.ttf");
   };
 
   sketch.setup = () => {

@@ -1,4 +1,4 @@
-const baseSynthConfig = {
+const baseEmitterDefaults = {
   synth: {
     oscillator: {},
     envelope: {
@@ -74,7 +74,7 @@ const baseSynthFollowerConfig = {
     max: 0.3
   }
 };
-const voiceConfig = {
+const melodicEmitterDefaults = {
   portamento: 0.2,
   osc: {
     type: `pulse`,
@@ -98,6 +98,8 @@ const voiceConfig = {
     gain: 0.4
   }
 };
+
+//TODO: The way I work with this sucks and it's used too many different ways in different places.
 const formantPresets = [
   {
     name: `a`,
@@ -257,8 +259,8 @@ const formantPresets = [
 ];
 
 export {
-  baseSynthConfig,
+  baseEmitterDefaults,
+  melodicEmitterDefaults,
   baseSynthFollowerConfig,
-  voiceConfig,
   formantPresets
 };

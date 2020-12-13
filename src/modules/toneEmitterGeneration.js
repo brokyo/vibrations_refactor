@@ -1,15 +1,16 @@
 import * as Tone from "tone";
 import _ from "lodash";
 import {
-  baseSynthConfig,
-  voiceConfig,
+  baseEmitterDefaults,
+  melodicEmitterDefaults,
   formantPresets
 } from "../config/instrument-config.js";
 
-// `BaseSynth` is the underlying drone. It's a polysynth made up one one complex
-// waveform and a bunch of effects
-class BaseSynth {
-  constructor(config) {
+// `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
+///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere
+class BaseEmitter {
+  constructor(userConfig) {
+    config = (userConfig == {}) ? baseEmitterDefaults: userConfig; 
     this.color = {
       web: { h: 0, s: 0, v: 0 },
       hue: { h: 0, s: 0, v: 0 }
@@ -42,7 +43,7 @@ class BaseSynth {
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
-class ChoirSection {
+class MelodicEmitter {
   constructor(config) {
     ///////////////
     // UNIVERSAL //
@@ -170,6 +171,31 @@ class ChoirSection {
   }
 }
 
-let baseSynth = new BaseSynth(baseSynthConfig);
+function createBaseEmitter(config) {
+  return new BaseEmitter(config);
+}
 
-export { baseSynth, ChoirSection };
+
+// if (this.hueIntegration) {
+//   this.choirSections = this.$_.times(4, i => {
+//     return new module.ChoirSection({
+//       id: this.lightArray[i].id,
+//       oscCount: 10,
+//       position: this.lightArray[i].position
+//     });
+//   });
+// } else {
+//   let sectionPositions = [-1, -0.5, 0.5, 1];
+//   this.choirSections = this.$_.times(4, i => {
+//     return new module.ChoirSection({
+//       id: null,
+//       oscCount: 10,
+//       position: sectionPositions[i]
+//     });
+//   });
+// }
+function createMelodicEmitter(config) {
+  return new MelodicEmitter(config);
+}
+
+export { createBaseEmitter, createMelodicEmitter };
