@@ -37,7 +37,7 @@ export default {
         tonic: null,
         key: null,
         utterance: {
-          length: null,
+          type: null,
           text: null
         },
         activeCard: {},
@@ -52,7 +52,7 @@ export default {
       // TODO: Error handling
       await this.initLibraries();
       await this.configureLibraries();
-      // let configuredWaveValues = await this.configureWave();
+      await this.generateWave();
       // let waveScheduled = await this.scheduleWave();
     },
     // MACHINE ACTIONS
@@ -155,15 +155,18 @@ export default {
       });
       this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
-    getNewUtterance() {
-      // TODO: This import is probably more trouble than it's worth. Maybe look into persisting `this`?
-      let dataModel = this;
-      import(`@/modules/utterances.js`).then(module => {
-        let selectedUtterance = module.getUtterance();
-        dataModel.waveMeta.prefix = selectedUtterance.prefix;
-        dataModel.waveMeta.utterance.type = selectedUtterance.type;
-        dataModel.waveMeta.utterance.text = selectedUtterance.text;
+    async generateWave() {
+      let utteranceSelected = await this.getNewUtterance();
+    },
+    async getNewUtterance() {
+      let utterance = await import(`@/modules/utterance-generator.js`).then(module => {
+        return module.getUtterance();
       });
+
+      this.waveMeta.prefix = utterance.prefix;
+      this.waveMeta.utterance = utterance.selected;
+
+      return true;
     },
     getNewTimbre() {
       import(`@/config/instrument-config.js`).then(module => {
