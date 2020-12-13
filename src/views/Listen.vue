@@ -14,13 +14,17 @@ export default {
   name: `Listen`,
   data: function() {
     return {
-      hueIntegration: null,
-      lightArray: [],
-      baseSynth: {},
-      melodicToneEmitters: null,
-      toneSpace: {},
-      roomChain: {},
-      activeCard: {},
+      p5Meta: {
+        color: null
+      },
+      hueMeta: {
+        lightArray: []
+      },
+      toneMeta: {
+        baseToneEmitter: null,
+        melodicToneEmitters: [],
+        toneSpace: {}
+      },
       waveMeta: {
         count: 0,
         prefix: null,
@@ -29,10 +33,11 @@ export default {
         utterance: {
           length: null,
           text: null
-        }
-      },
-      possibleNotes: [],
-      possibleChords: []
+        },
+        activeCard: {},
+        possibleNotes: [],
+        possibleChords: []
+      }
     };
   },
   methods: {
