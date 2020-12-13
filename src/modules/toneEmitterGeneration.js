@@ -10,7 +10,7 @@ import {
 ///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere
 class BaseEmitter {
   constructor(userConfig) {
-    config = (userConfig == {}) ? baseEmitterDefaults: userConfig; 
+    let config = userConfig == undefined ? baseEmitterDefaults : userConfig;
     this.color = {
       web: { h: 0, s: 0, v: 0 },
       hue: { h: 0, s: 0, v: 0 }
@@ -44,7 +44,8 @@ class BaseEmitter {
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
 class MelodicEmitter {
-  constructor(config) {
+  constructor(userConfig) {
+    let config = userConfig == undefined ? melodicEmitterDefaults : userConfig;
     ///////////////
     // UNIVERSAL //
     ///////////////
@@ -67,24 +68,24 @@ class MelodicEmitter {
     // VOICE //
     ///////////
     this.voice = {};
-    this.voice.portamento = voiceConfig.portamento;
+    this.voice.portamento = config.portamento;
 
     // -- VOX -- //
-    this.voice.voxOut = new Tone.Gain(voiceConfig.voxOut.gain);
+    this.voice.voxOut = new Tone.Gain(config.voxOut.gain);
 
     this.voice.oscs = _.times(15, function() {
       return new Tone.OmniOscillator({
-        type: voiceConfig.osc.type,
-        width: voiceConfig.osc.width,
-        detune: _.random(voiceConfig.osc.detuneMin, voiceConfig.osc.detuneMax)
+        type: config.osc.type,
+        width: config.osc.width,
+        detune: _.random(config.osc.detuneMin, config.osc.detuneMax)
       }).start();
     });
 
     this.voice.envs = _.times(15, function() {
       return new Tone.AmplitudeEnvelope({
-        attackCurve: voiceConfig.env.attackCurve,
-        decayCurve: voiceConfig.env.decayCurve,
-        releaseCurve: voiceConfig.env.releaseCurve
+        attackCurve: config.env.attackCurve,
+        decayCurve: config.env.decayCurve,
+        releaseCurve: config.env.releaseCurve
       });
     });
 
@@ -95,8 +96,8 @@ class MelodicEmitter {
 
     // -- WHITE NOISE -- //
     this.voice.noise = new Tone.Noise({
-      playbackRate: voiceConfig.noise.playbackRate,
-      volume: voiceConfig.noise.volume
+      playbackRate: config.noise.playbackRate,
+      volume: config.noise.volume
     }).start();
 
     this.voice.noise.connect(this.voice.envs[0]);
@@ -142,7 +143,7 @@ class MelodicEmitter {
 
     // -- EFFECTS -- //
     this.voice.position = new Tone.Panner(0);
-    this.voice.lineOut = new Tone.Gain(voiceConfig.lineOut.gain);
+    this.voice.lineOut = new Tone.Gain(config.lineOut.gain);
 
     this.voice.formantOut.chain(this.voice.position, this.voice.lineOut);
   }
@@ -171,10 +172,9 @@ class MelodicEmitter {
   }
 }
 
-function createBaseEmitter(config) {
+function createBaseToneEmitter(config) {
   return new BaseEmitter(config);
 }
-
 
 // if (this.hueIntegration) {
 //   this.choirSections = this.$_.times(4, i => {
@@ -194,8 +194,8 @@ function createBaseEmitter(config) {
 //     });
 //   });
 // }
-function createMelodicEmitter(config) {
+function createMelodicToneEmitter(config) {
   return new MelodicEmitter(config);
 }
 
-export { createBaseEmitter, createMelodicEmitter };
+export { createBaseToneEmitter, createMelodicToneEmitter };

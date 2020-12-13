@@ -2,11 +2,12 @@ import * as Tone from "tone";
 import { spaceConfigDefaults } from "../config/toneSpaceConfig.js";
 
 function createToneSpace(userConfig) {
-  let config = userConfig == {} ? spaceConfigDefaults : userConfig;
+  let config = userConfig == undefined ? spaceConfigDefaults : userConfig;
   let toneSpace = {
     in: new Tone.Gain(),
     reverb: new Tone.Freeverb(config.reverb),
     tremolo: new Tone.Tremolo(config.tremolo),
+    delay: new Tone.PingPongDelay(config.delay),
     eq: new Tone.EQ3(config.eq),
     out: new Tone.Gain()
   };

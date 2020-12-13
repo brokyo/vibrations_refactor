@@ -51,8 +51,8 @@ export default {
     async enterSpace() {
       // TODO: Error handling
       let initialLibraryValues = await this.initLibraries();
-      console.log(initialLibraryValues);
-      // let configuredLibraryValues = await this.configureLibraries();
+      let configuredLibraryValues = await this.configureLibraries();
+      console.log(configuredLibraryValues);
       // let configuredWaveValues = await this.configureWave();
       // let waveScheduled = await this.scheduleWave();
     },
@@ -92,40 +92,60 @@ export default {
       return true;
     },
     async configureLibraries() {
-      let visualsConfigured = this.configureP5();
-      let lightsConfigured = this.configureHue();
-      let soundConfigured = this.configureTone();
+      let visualsConfigured = await this.configureP5();
+      let lightsConfigured = await this.configureHue();
+      let soundConfigured = await this.configureTone();
 
-      await Promise.all(visualsConfigured, lightsConfigured, soundConfigured);
+      return await Promise.all([
+        visualsConfigured,
+        lightsConfigured,
+        soundConfigured
+      ]);
     },
     async configureP5() {
-      import(`@/modules/create-p5`).then(module => {
-        let myp5 = new p5(module.s);
-
-        // connects myp5 to actively changing stuff in the reactive data
-        myp5.choirSections = this.choirSections;
-        myp5.activeCard = this.activeCard;
-        myp5.waveMeta = this.waveMeta;
+      let vibrationCanvas = await import(`@/modules/create-p5`).then(module => {
+        return new p5(module.s);
       });
+
+      // Connect p5 sketch to relevant parts of reactive data object
+      // TODO: This is a hack... is there a cleaner way?
+      vibrationCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
+      vibrationCanvas.waveMeta = this.waveMeta;
+
+      return true;
     },
     async configureHue() {
       // Hue logic here
       let hueVals = false;
       console.log(hueVals);
+      return true;
     },
     async configureTone() {
       // Get configured instruments
-      import(`@/modules/toneEmitterGeneration.js`).then(module => {
-        this.$_.times(this.hueMeta.lightArray.length, i => {
-          console.log(i);
-          this.melodicToneEmitters.push(module.createMelodicEmitter());
-        });
-        this.baseEmitter = module.createBaseToneEmitter();
+      let emitterGenerator = await import(
+        `@/modules/toneEmitterGeneration.js`
+      ).then(module => {
+        return module;
       });
 
-      import(`@/modules/toneSpaceGeneration.js`).then(module => {
-        this.toneSpace = module.createToneSpace();
+      this.$_.times(this.hueMeta.lightArray.length, i => {
+        console.log(i);
+        this.toneMeta.melodicToneEmitters.push(
+          emitterGenerator.createMelodicToneEmitter()
+        );
       });
+
+      this.toneMeta.baseToneEmitter = emitterGenerator.createBaseToneEmitter();
+
+      let spaceGenerator = await import(
+        `@/modules/toneSpaceGeneration.js`
+      ).then(module => {
+        return module;
+      });
+
+      this.toneSpace = spaceGenerator.createToneSpace();
+
+      return true;
     },
     async connectTone() {
       this.baseEmitter.out.connect(this.toneSpace.in);

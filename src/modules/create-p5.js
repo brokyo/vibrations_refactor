@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 
 const s = sketch => {
   sketch.preload = () => {
-    // sketch.font = sketch.loadFont("/assets/Abel-Regular.ttf");
+    // sketch.font = sketch.loadFont("assets/Abel-Regular.ttf");
   };
 
   sketch.setup = () => {
@@ -13,38 +13,37 @@ const s = sketch => {
   };
 
   sketch.draw = () => {
-    sketch.choirSections.forEach(choirSection => {
-      if (choirSection.color.changing) {
-        choirSection.color.iterator += choirSection.color.iteratorStep;
-        choirSection.color.current = chroma.mix(
-          chroma(choirSection.color.start),
-          chroma(choirSection.color.end),
-          choirSection.color.iterator,
+    sketch.melodicToneEmitters.forEach(melodicToneEmitter => {
+      if (melodicToneEmitter.color.changing) {
+        melodicToneEmitter.color.iterator += melodicToneEmitter.color.iteratorStep;
+        melodicToneEmitter.color.current = chroma.mix(
+          chroma(melodicToneEmitter.color.start),
+          chroma(melodicToneEmitter.color.end),
+          melodicToneEmitter.color.iterator,
           `hsv`
         );
 
-        if (choirSection.color.iterator >= 1) {
-          choirSection.color.changing = false;
-          choirSection.color.iterator = 0;
+        if (melodicToneEmitter.color.iterator >= 1) {
+          melodicToneEmitter.color.changing = false;
+          melodicToneEmitter.color.iterator = 0;
         }
       }
     });
 
-    let colors = [
-      sketch.choirSections[0].color.current,
-      sketch.choirSections[1].color.current,
-      sketch.choirSections[2].color.current,
-      sketch.choirSections[3].color.current
-    ];
+    let colors = [];
+
+    sketch.melodicToneEmitters.forEach(emitter => {
+      colors.push(emitter.color.current);
+    });
 
     let average = chroma.average(colors).hex();
     sketch.background(average);
 
-    sketch.textFont(sketch.font);
+    // sketch.textFont(sketch.font);
     sketch.fill(255);
 
     sketch.textAlign(sketch.CENTER);
-    if (sketch.activeCard === `performance`) {
+    if (sketch.waveMeta.activeCard === `performance`) {
       if (sketch.waveMeta.utterance.type == `short`) {
         sketch.textSize(45);
         sketch.text(
@@ -61,7 +60,7 @@ const s = sketch => {
           sketch.windowWidth / 2
         );
       }
-    } else if (sketch.activeCard === `title`) {
+    } else if (sketch.waveMeta.activeCard === `title`) {
       sketch.textSize(65);
       sketch.text(
         `awakening sytems: ${sketch.waveMeta.prefix}`,
