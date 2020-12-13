@@ -142,16 +142,18 @@ export default {
         return module;
       });
 
-      this.toneSpace = spaceGenerator.createToneSpace();
+      this.toneMeta.toneSpace = spaceGenerator.createToneSpace();
+
+      this.connectTone();
 
       return true;
     },
     async connectTone() {
-      this.baseEmitter.out.connect(this.toneSpace.in);
-      this.melodicToneEmitters.forEach(emitter => {
-        emitter.out.connect(this.toneSpace.in);
+      this.toneMeta.baseToneEmitter.out.connect(this.toneMeta.toneSpace.in);
+      this.toneMeta.melodicToneEmitters.forEach(emitter => {
+        emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
       });
-      this.toneSpace.out.connect(Tone.Master);
+      this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
     getNewUtterance() {
       // TODO: This import is probably more trouble than it's worth. Maybe look into persisting `this`?
