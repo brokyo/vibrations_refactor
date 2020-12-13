@@ -86,4 +86,4 @@ const colorMap = [
   }
 ];
 
-export { colorMap }
+export { colorMap };

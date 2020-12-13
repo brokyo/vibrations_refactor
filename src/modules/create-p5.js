@@ -15,7 +15,8 @@ const s = sketch => {
   sketch.draw = () => {
     sketch.melodicToneEmitters.forEach(melodicToneEmitter => {
       if (melodicToneEmitter.color.changing) {
-        melodicToneEmitter.color.iterator += melodicToneEmitter.color.iteratorStep;
+        melodicToneEmitter.color.iterator +=
+          melodicToneEmitter.color.iteratorStep;
         melodicToneEmitter.color.current = chroma.mix(
           chroma(melodicToneEmitter.color.start),
           chroma(melodicToneEmitter.color.end),

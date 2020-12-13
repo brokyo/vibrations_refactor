@@ -92,7 +92,7 @@ class MelodicEmitter {
     this.voice.oscs.forEach((osc, index) =>
       osc.connect(this.voice.envs[index])
     );
-    this.voice.envs.forEach((env, index) => env.connect(this.voice.voxOut));
+    this.voice.envs.forEach(env => env.connect(this.voice.voxOut));
 
     // -- WHITE NOISE -- //
     this.voice.noise = new Tone.Noise({
@@ -116,7 +116,7 @@ class MelodicEmitter {
       }).start();
     });
 
-    this.voice.formantNodes = _.times(5, function(index) {
+    this.voice.formantNodes = _.times(5, function() {
       return new Tone.Filter({
         type: `bandpass`,
         rolloff: -24

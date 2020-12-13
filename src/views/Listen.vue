@@ -50,9 +50,8 @@ export default {
     //USER ACTIONS
     async enterSpace() {
       // TODO: Error handling
-      let initialLibraryValues = await this.initLibraries();
-      let configuredLibraryValues = await this.configureLibraries();
-      console.log(configuredLibraryValues);
+      await this.initLibraries();
+      await this.configureLibraries();
       // let configuredWaveValues = await this.configureWave();
       // let waveScheduled = await this.scheduleWave();
     },
