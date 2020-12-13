@@ -413,10 +413,8 @@ const groups = [
 
 function getUtterance() {
   let utteranceGroup = _.sample(groups);
-  let selectedUtterance = {
-    prefix: utteranceGroup.prefix,
-    selected: _.sample(utteranceGroup.options)  
-  }
+  let selectedUtterance = _.sample(utteranceGroup.options);
+  selectedUtterance.prefix = utteranceGroup.prefix;
 
   return selectedUtterance;
 }

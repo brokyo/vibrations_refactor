@@ -32,17 +32,18 @@ export default {
         toneSpace: {}
       },
       waveMeta: {
-        count: 0,
-        prefix: null,
-        tonic: null,
-        key: null,
+        key: {
+          name: null,
+          tonic: null,
+          type: null,
+          scale: []
+        },
         utterance: {
+          prefix: null,
           type: null,
           text: null
         },
-        activeCard: {},
-        possibleNotes: [],
-        possibleChords: []
+        activeCard: {}
       }
     };
   },
@@ -156,62 +157,56 @@ export default {
       this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
     async generateWave() {
-      let utteranceSelected = await this.getNewUtterance();
+      await this.getNewUtterance();
+      await this.getNewScale();
     },
     async getNewUtterance() {
-      let utterance = await import(`@/modules/utterance-generator.js`).then(module => {
-        return module.getUtterance();
-      });
+      let utterance = await import(`@/modules/utterance-generator.js`).then(
+        module => {
+          return module.getUtterance();
+        }
+      );
 
-      this.waveMeta.prefix = utterance.prefix;
-      this.waveMeta.utterance = utterance.selected;
+      this.waveMeta.utterance = utterance;
 
       return true;
     },
-    getNewTimbre() {
-      import(`@/config/instrument-config.js`).then(module => {
-        let randomFormant = this.$_.random(0, module.formantPresets.length - 1);
+    async getNewScale() {
+      //TODO: should probably dynamically import Tonal too
+      let key = {
+        tonic: null,
+        type: null,
+        name: null,
+        scale: []
+      };
+      const possibleNotes = [`A`, `B`, `C`, `D`, `E`, `F`, `G`];
 
-        this.choirSections.forEach(section =>
-          section.changeFormant(randomFormant)
-        );
-      });
-    },
-    getNewScale() {
-      let key = {};
-      let baseOctave, tonic;
+      // Build Key
 
+      // Major Wave Setup
       if (Math.random() > 0.75) {
-        baseOctave = 3;
-        tonic = this.newTonic(baseOctave);
+        let tonicNote = this.$_.sample(possibleNotes);
+        let baseOctave = 3;
+        let tonic = tonicNote.concat(baseOctave);
 
-        key.type = `major`;
         key.tonic = tonic;
-        key.scale = Tonal.Key.majorKey(tonic).scale;
-
-        // Change timbre
-        let partials = [];
-        this.baseSynth.synth.voices.forEach(voice => {
-          voice.set({ type: partials });
-        });
-      } else {
-        baseOctave = 2;
-        tonic = this.newTonic(baseOctave);
-
         key.type = `minor`;
-        key.tonic = tonic;
+        key.name = `${tonic.slice(0, -1)} ${key.type}`;
         key.scale = Tonal.Key.minorKey(tonic).melodic.scale;
 
-        // Change timbre
-        let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
-        this.baseSynth.synth.voices.forEach(voice => {
-          voice.set({ partials: partials });
-        });
+      // Minor Wave Setup
+      } else {
+        let tonicNote = this.$_.sample(possibleNotes);
+        let baseOctave = 4;
+        let tonic = tonicNote.concat(baseOctave);
 
-        this.waveMeta.tonic = tonic;
-        this.waveMeta.key = `${tonic.slice(0, -1)} ${key.type}`;
+        key.tonic = tonic;
+        key.type = `major`;
+        key.name = `${tonic.slice(0, -1)} ${key.type}`;
+        key.scale = Tonal.Key.majorKey(tonic).scale;
       }
 
+      // Expand scale
       let lowerNotes = [];
       let higherNotes = [];
       for (let i = 0; i < 4; i++) {
@@ -221,31 +216,22 @@ export default {
         higherNotes.push(noteAbove);
       }
 
-      this.possibleNotes = lowerNotes.concat(key.scale).concat(higherNotes);
-      this.possibleChords = key.chords;
+      key.scale = lowerNotes.concat(key.scale).concat(higherNotes);
 
-      import(`@/modules/color-map.js`).then(module => {
-        let nextColor = this.$_.find(module.colorMap, {
-          note: tonic.slice(0, -1)
-        });
-        this.baseSynth.color.web = {
-          h: nextColor.webColor.h,
-          s: nextColor.webColor.s,
-          v: 0.15
-        };
-        this.baseSynth.color.hue = nextColor.hueColor;
-        this.baseSynth.color.hue.v = 0;
-      });
+      this.waveMeta.key = key;
     },
-
-    newTonic(baseOctave) {
-      const possibleNotes = [`A`, `B`, `C`, `D`, `E`, `F`, `G`];
-      let tonic = this.$_.sample(possibleNotes);
-      tonic += baseOctave;
-
-      return tonic;
+    async updateEmitterTimbre() {
+      // Change timbre for Major
+      // let partials = [];
+      // this.toneMeta.baseEmitter.synth.voices.forEach(voice => {
+      //   voice.set({ type: partials });
+      // });
+      // // Change timbre for Minor
+      // let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
+      // this.toneMeta.baseEmitter.synth.voices.forEach(voice => {
+      //   voice.set({ partials: partials });
+      // });
     },
-
     scheduleWave() {
       this.waveMeta.count++;
       this.getNewUtterance();
