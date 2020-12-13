@@ -159,6 +159,7 @@ export default {
     async generateWave() {
       await this.getNewUtterance();
       await this.getNewScale();
+      await this.updateEmitterTimbre();
     },
     async getNewUtterance() {
       let utterance = await import(`@/modules/utterance-generator.js`).then(
@@ -194,7 +195,7 @@ export default {
         key.name = `${tonic.slice(0, -1)} ${key.type}`;
         key.scale = Tonal.Key.minorKey(tonic).melodic.scale;
 
-      // Minor Wave Setup
+        // Minor Wave Setup
       } else {
         let tonicNote = this.$_.sample(possibleNotes);
         let baseOctave = 4;
@@ -221,22 +222,19 @@ export default {
       this.waveMeta.key = key;
     },
     async updateEmitterTimbre() {
-      // Change timbre for Major
-      // let partials = [];
-      // this.toneMeta.baseEmitter.synth.voices.forEach(voice => {
-      //   voice.set({ type: partials });
-      // });
-      // // Change timbre for Minor
-      // let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
-      // this.toneMeta.baseEmitter.synth.voices.forEach(voice => {
-      //   voice.set({ partials: partials });
-      // });
+      if (this.waveMeta.type == `major`) {
+        let partials = [];
+        this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
+          voice.set({ type: partials });
+        });
+      } else if (this.waveMeta.type == `minor`) {
+        let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
+        this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
+          voice.set({ partials: partials });
+        });
+      }
     },
     scheduleWave() {
-      this.waveMeta.count++;
-      this.getNewUtterance();
-      this.getNewTimbre();
-      this.getNewScale();
       // baseSynth.synth.triggerAttack(waveMeta.tonic);
       // activeCard = `title`;
 
