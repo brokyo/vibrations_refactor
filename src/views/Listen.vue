@@ -54,9 +54,18 @@ export default {
       await this.initLibraries();
       await this.configureLibraries();
       await this.generateWave();
-      // let waveScheduled = await this.scheduleWave();
+      await this.scheduleWave();
+
+      // TODO: Sleeping because Tone.JS pops otherwise
+      await this.sleep(2500);
+      Tone.Master.mute = false;
+      await this.startWave();
     },
-    // MACHINE ACTIONS
+    // Utilities
+    async sleep(ms) {
+      await new Promise(resolve => setTimeout(resolve, ms));
+    },
+    // Initialize Libraries
     async initLibraries() {
       let visualsInitialized = await this.initP5();
       let lightsInitialized = await this.initHue();
@@ -88,9 +97,11 @@ export default {
         return module.default;
       });
       this.toneMeta.initialized = true;
+      Tone.Master.mute = true;
 
       return true;
     },
+    // Configure Libraries
     async configureLibraries() {
       let visualsConfigured = await this.configureP5();
       let lightsConfigured = await this.configureHue();
@@ -152,16 +163,17 @@ export default {
     async connectTone() {
       this.toneMeta.baseToneEmitter.out.connect(this.toneMeta.toneSpace.in);
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
+        // emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
       });
       this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
+    // Generate wave
     async generateWave() {
-      await this.getNewUtterance();
-      await this.getNewScale();
-      await this.updateEmitterTimbre();
+      await this.generateUtterance();
+      await this.generateScale();
+      await this.generateEmitterTimbre();
     },
-    async getNewUtterance() {
+    async generateUtterance() {
       let utterance = await import(`@/modules/utterance-generator.js`).then(
         module => {
           return module.getUtterance();
@@ -172,7 +184,7 @@ export default {
 
       return true;
     },
-    async getNewScale() {
+    async generateScale() {
       //TODO: should probably dynamically import Tonal too
       let key = {
         tonic: null,
@@ -231,7 +243,7 @@ export default {
 
       this.waveMeta.key = key;
     },
-    async updateEmitterTimbre() {
+    async generateEmitterTimbre() {
       // Change baseToneEmitter voice
       if (this.waveMeta.type == `major`) {
         let partials = [];
@@ -244,15 +256,18 @@ export default {
           voice.set({ partials: partials });
         });
       }
+      ``;
 
       // Change formant
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
         emitter.changeFormant(this.waveMeta.key.formant.filters);
       });
     },
+    // Schedule wave
     scheduleWave() {
       //
-      // baseSynth.synth.triggerAttack(waveMeta.tonic);
+      // Tone.Master.mute = false
+      // this.toneMeta.baseToneEmitter.synth.triggerAttack(this.waveMeta.key.tonic);
       // activeCard = `title`;
       // setTimeout(() => {
       //   activeCard = `performance`;
@@ -268,7 +283,12 @@ export default {
       // }, 11000);
       // console.table(waveMeta);
     },
-    startWave() {}
+    startWave() {
+      console.log(Tone.Master.mute)
+      this.toneMeta.baseToneEmitter.synth.triggerAttack(
+        this.waveMeta.key.tonic
+      );
+    }
   }
 };
 </script>
