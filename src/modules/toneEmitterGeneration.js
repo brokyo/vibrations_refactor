@@ -2,8 +2,7 @@ import * as Tone from "tone";
 import _ from "lodash";
 import {
   baseEmitterDefaults,
-  melodicEmitterDefaults,
-  formantPresets
+  melodicEmitterDefaults
 } from "../config/instrument-config.js";
 
 // `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
@@ -156,10 +155,8 @@ class MelodicEmitter {
     this.active = false;
   }
 
-  changeFormant(index) {
-    var vocalizationConfig = formantPresets[index].formants;
-
-    vocalizationConfig.forEach((config, index) => {
+  changeFormant(formantConfig) {
+    formantConfig.forEach((config, index) => {
       this.voice.formantNodes[index].set({
         frequency: config.frequency,
         Q: config.frequency / config.bw

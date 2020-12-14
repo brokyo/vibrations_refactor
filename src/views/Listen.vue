@@ -178,6 +178,7 @@ export default {
         tonic: null,
         type: null,
         name: null,
+        formant: null,
         scale: []
       };
       const possibleNotes = [`A`, `B`, `C`, `D`, `E`, `F`, `G`];
@@ -219,9 +220,19 @@ export default {
 
       key.scale = lowerNotes.concat(key.scale).concat(higherNotes);
 
+      // select formant
+      let newFormant = await import(`@/config/instrument-config.js`).then(
+        module => {
+          return module.getRandomFormant();
+        }
+      );
+
+      key.formant = newFormant;
+
       this.waveMeta.key = key;
     },
     async updateEmitterTimbre() {
+      // Change baseToneEmitter voice
       if (this.waveMeta.type == `major`) {
         let partials = [];
         this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
@@ -233,11 +244,16 @@ export default {
           voice.set({ partials: partials });
         });
       }
+
+      // Change formant
+      this.toneMeta.melodicToneEmitters.forEach(emitter => {
+        emitter.changeFormant(this.waveMeta.key.formant.filters);
+      });
     },
     scheduleWave() {
+      //
       // baseSynth.synth.triggerAttack(waveMeta.tonic);
       // activeCard = `title`;
-
       // setTimeout(() => {
       //   activeCard = `performance`;
       //   for (let i = 0; i < sections.length; i++) {
@@ -250,9 +266,9 @@ export default {
       //     scheduleEvents(i);
       //   }
       // }, 11000);
-
       // console.table(waveMeta);
-    }
+    },
+    startWave() {}
   }
 };
 </script>

@@ -104,7 +104,7 @@ const formantPresets = [
   {
     name: `a`,
     type: `bass`,
-    formants: [
+    filters: [
       {
         frequency: 600,
         volume: 0,
@@ -135,7 +135,7 @@ const formantPresets = [
   {
     name: `e`,
     type: `bass`,
-    formants: [
+    filters: [
       {
         frequency: 400,
         volume: 0,
@@ -166,7 +166,7 @@ const formantPresets = [
   {
     name: `i`,
     type: `bass`,
-    formants: [
+    filters: [
       {
         frequency: 250,
         volume: 0,
@@ -197,7 +197,7 @@ const formantPresets = [
   {
     name: `o`,
     type: `bass`,
-    formants: [
+    filters: [
       {
         frequency: 400,
         volume: 0,
@@ -228,7 +228,7 @@ const formantPresets = [
   {
     name: `u`,
     type: `bass`,
-    formants: [
+    filters: [
       {
         frequency: 350,
         volume: 0,
@@ -257,10 +257,13 @@ const formantPresets = [
     ]
   }
 ];
+function getRandomFormant() {
+  return formantPresets[Math.floor(Math.random() * formantPresets.length)];
+}
 
 export {
   baseEmitterDefaults,
   melodicEmitterDefaults,
   baseSynthFollowerConfig,
-  formantPresets
+  getRandomFormant
 };
