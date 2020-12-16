@@ -119,8 +119,15 @@ export default {
         return new p5(module.s);
       });
 
+      let defaultColorObject = {
+        changing: true,
+        start: `#000000`,
+        end: `#000000`,
+        iteratorStep: 0
+      };
+
       this.$_.times(this.hueMeta.lightArray.length, () => {
-        this.p5Meta.activeColorArray.push({ color: `#000000` });
+        this.p5Meta.activeColorArray.push(defaultColorObject);
       });
 
       // Connect p5 sketch to relevant parts of reactive data object
