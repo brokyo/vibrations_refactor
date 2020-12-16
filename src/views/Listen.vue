@@ -17,7 +17,8 @@ export default {
       p5Meta: {
         initialized: false,
         configured: false,
-        color: null
+        color: null,
+        activeColorArray: []
       },
       hueMeta: {
         initialized: false,
@@ -118,6 +119,10 @@ export default {
         return new p5(module.s);
       });
 
+      this.$_.times(this.hueMeta.lightArray.length, () => {
+        this.p5Meta.activeColorArray.push({ color: `#000000` });
+      });
+
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
       vibrationCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
@@ -139,8 +144,7 @@ export default {
         return module;
       });
 
-      this.$_.times(this.hueMeta.lightArray.length, i => {
-        console.log(i);
+      this.$_.times(this.hueMeta.lightArray.length, () => {
         this.toneMeta.melodicToneEmitters.push(
           emitterGenerator.createMelodicToneEmitter()
         );
@@ -163,7 +167,7 @@ export default {
     async connectTone() {
       this.toneMeta.baseToneEmitter.out.connect(this.toneMeta.toneSpace.in);
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        // emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
+        emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
       });
       this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
@@ -284,7 +288,7 @@ export default {
       // console.table(waveMeta);
     },
     startWave() {
-      console.log(Tone.Master.mute)
+      console.log(Tone.Master.mute);
       this.toneMeta.baseToneEmitter.synth.triggerAttack(
         this.waveMeta.key.tonic
       );
