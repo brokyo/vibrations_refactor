@@ -250,7 +250,8 @@ class MelodicEmitter {
   }
 
   generateWave(key) {
-    this.tonicColor = associateNoteAndColor(key.tonic).webColor;
+    let tonicColor = associateNoteAndColor(key.tonic).webColor;
+    this.tonicColor = {h: tonicColor.h, s: tonicColor.s, v: 0.15}
     let waveEventsArray = [];
     let startShift = 0;
 
