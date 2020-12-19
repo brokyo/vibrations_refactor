@@ -173,18 +173,10 @@ class MelodicEmitter {
   generateEventConfig(key) {
     let eventConfig = {
       pitch: _.sample(key.pitches),
-      attack: _.random(eventRanges.attack.min, eventRanges.attack.max).toFixed(
-        2
-      ),
-      sustain: _.random(
-        eventRanges.sustain.min,
-        eventRanges.sustain.max
-      ).toFixed(2),
-      release: _.random(
-        eventRanges.release.min,
-        eventRanges.release.max
-      ).toFixed(2),
-      rest: _.random(eventRanges.rest.min, eventRanges.rest.max).toFixed(2)
+      attack: _.random(eventRanges.attack.min, eventRanges.attack.max),
+      sustain: _.random(eventRanges.sustain.min, eventRanges.sustain.max),
+      release: _.random(eventRanges.release.min, eventRanges.release.max),
+      rest: _.random(eventRanges.rest.min, eventRanges.rest.max)
     };
 
     return eventConfig;
@@ -226,9 +218,9 @@ class MelodicEmitter {
 
   createReleaseEvent(eventConfig, startShift) {
     let releaseEvent = new Tone.Event(time => {
-      console.log(`release`);
-      toneReleaseEvent();
-      p5ReleaseEvent(eventConfig);
+      let emitter = this;
+      toneReleaseEvent(emitter);
+      p5ReleaseEvent(eventConfig, emitter);
     });
     releaseEvent.time = 0;
     releaseEvent.type = `release`;
@@ -236,25 +228,23 @@ class MelodicEmitter {
 
     return releaseEvent;
 
-    function toneReleaseEvent() {
-      console.log(this);
-      this.voice.envs.forEach(env => {
+    function toneReleaseEvent(emitter) {
+      emitter.voice.envs.forEach(env => {
         env.triggerRelease();
       });
     }
 
-    function p5ReleaseEvent(eventConfig) {
-      this.color.changing = true;
-      this.color.start = this.color.current;
-      // this.color.end = baseSynth.color.web;
-      this.color.iteratorStep = 1 / (eventConfig.release * 30);
+    function p5ReleaseEvent(eventConfig, emitter) {
+      emitter.color.changing = true;
+      emitter.color.start = emitter.color.current;
+      emitter.color.end = '#000000';
+      emitter.color.iteratorStep = 1 / (eventConfig.release * 30);
     }
   }
 
   createCompletedEvent(eventConfig, startShift) {
     let endEvent = new Tone.Event(time => {
       this.active = false;
-      console.log(`im done`);
     });
   }
 
