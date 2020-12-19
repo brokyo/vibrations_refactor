@@ -56,6 +56,7 @@ class MelodicEmitter {
     ///////////
     // COLOR //
     ///////////
+    this.tonicColor = {h: 0, s: 0, v:0};
     this.color = {
       changing: false,
       start: { h: 0, s: 0, v: 0 },
@@ -190,7 +191,7 @@ class MelodicEmitter {
     });
     attackEvent.type = `attack`;
     attackEvent.time = 0;
-    attackEvent.degree = eventConfig.pitch;
+    attackEvent.pitch = eventConfig.pitch;
     attackEvent.start(Tone.Time().now() + startShift);
     return attackEvent;
 
@@ -237,7 +238,7 @@ class MelodicEmitter {
     function p5ReleaseEvent(eventConfig, emitter) {
       emitter.color.changing = true;
       emitter.color.start = emitter.color.current;
-      emitter.color.end = '#000000';
+      emitter.color.end = emitter.tonicColor;
       emitter.color.iteratorStep = 1 / (eventConfig.release * 30);
     }
   }
@@ -249,6 +250,7 @@ class MelodicEmitter {
   }
 
   generateWave(key) {
+    this.tonicColor = associateNoteAndColor(key.tonic).webColor;
     let waveEventsArray = [];
     let startShift = 0;
 
