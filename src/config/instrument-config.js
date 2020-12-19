@@ -257,7 +257,7 @@ const formantPresets = [
     ]
   }
 ];
-function getRandomFormant() {
+async function getRandomFormant() {
   return formantPresets[Math.floor(Math.random() * formantPresets.length)];
 }
 

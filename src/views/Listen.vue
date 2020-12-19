@@ -9,6 +9,8 @@
 
 <script>
 import * as Tonal from "@tonaljs/tonal";
+import { generateKey } from "@/modules/scheduler.js"
+
 let Tone, p5;
 export default {
   name: `Listen`,
@@ -194,65 +196,6 @@ export default {
       this.waveMeta.utterance = utterance;
 
       return true;
-    },
-    async generateScale() {
-      //TODO: should probably dynamically import Tonal too
-      let key = {
-        tonic: null,
-        type: null,
-        name: null,
-        formant: null,
-        scale: []
-      };
-      const possibleNotes = [`A`, `B`, `C`, `D`, `E`, `F`, `G`];
-
-      // Build Key
-
-      // Major Wave Setup
-      if (Math.random() > 0.75) {
-        let tonicNote = this.$_.sample(possibleNotes);
-        let baseOctave = 3;
-        let tonic = tonicNote.concat(baseOctave);
-
-        key.tonic = tonic;
-        key.type = `minor`;
-        key.name = `${tonic.slice(0, -1)} ${key.type}`;
-        key.scale = Tonal.Key.minorKey(tonic).melodic.scale;
-
-        // Minor Wave Setup
-      } else {
-        let tonicNote = this.$_.sample(possibleNotes);
-        let baseOctave = 4;
-        let tonic = tonicNote.concat(baseOctave);
-
-        key.tonic = tonic;
-        key.type = `major`;
-        key.name = `${tonic.slice(0, -1)} ${key.type}`;
-        key.scale = Tonal.Key.majorKey(tonic).scale;
-      }
-
-      // Expand scale
-      let lowerNotes = [];
-      let higherNotes = [];
-      for (let i = 0; i < 4; i++) {
-        let noteBelow = Tonal.Tonal.transpose(key.scale[i + 3], `-8P`);
-        let noteAbove = Tonal.Tonal.transpose(key.scale[i], `8P`);
-        lowerNotes.push(noteBelow);
-        higherNotes.push(noteAbove);
-      }
-
-      key.scale = lowerNotes.concat(key.scale).concat(higherNotes);
-
-      // select formant
-      let newFormant = await import(`@/config/instrument-config.js`).then(
-        module => {
-          return module.getRandomFormant();
-        }
-      );
-
-      key.formant = newFormant;
-
-      this.waveMeta.key = key;
     },
     async generateEmitterTimbre() {
       // Change baseToneEmitter voice
