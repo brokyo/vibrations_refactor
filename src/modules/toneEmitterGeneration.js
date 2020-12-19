@@ -4,7 +4,7 @@ import {
   baseEmitterDefaults,
   melodicEmitterDefaults
 } from "../config/instrument-config.js";
-import { waveConfig, eventRanges } from "@/config/wave-config.js";
+import { eventRanges } from "@/config/wave-config.js";
 
 // `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
 ///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere

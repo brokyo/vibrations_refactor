@@ -8,12 +8,7 @@
 </template>
 
 <script>
-import * as Tonal from "@tonaljs/tonal";
-import {
-  generateKey,
-  createBaseEventSchedule,
-  createMelodicEventSchedule
-} from "@/modules/scheduler.js";
+import { generateKey, createBaseEventSchedule } from "@/modules/scheduler.js";
 
 let Tone, p5;
 export default {
@@ -148,7 +143,7 @@ export default {
     async configureHue() {
       // Hue logic here
       let hueVals = false;
-      return true;
+      return hueVals;
     },
     async configureTone() {
       // Get configured instruments
@@ -237,8 +232,6 @@ export default {
         this.toneMeta.timeline.add(event);
       });
     },
-    melodicToneEmittersSchedule(schedule) {},
-    // Schedule wave
     scheduleWave() {
       //
       // Tone.Master.mute = false
