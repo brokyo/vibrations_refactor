@@ -1,4 +1,4 @@
-import { Key, Scale, Note } from "@tonaljs/tonal";
+import { Scale, Note } from "@tonaljs/tonal";
 import _ from "lodash";
 import { getRandomFormant } from "@/config/instrument-config.js";
 
@@ -47,9 +47,25 @@ async function generateKey() {
   return key;
 }
 
-async function generateEmitterTimbre() {
-  let key = await generateKey();
-  console.log()
+async function createBaseEventSchedule(key, baseEmitter) {
+  let Tone;
+  let baseEventSchedule = [];
+
+  Tone = await import(`tone`).then(module => {
+    return module.default;
+  });
+
+  let startEvent = new Tone.Event(time => {
+    baseEmitter.synth.triggerAttack(key.tonic);
+  });
+  startEvent.type = `base start`;
+  startEvent.time = 0;
+  startEvent.note = key.tonic;
+  startEvent.section = `base`;
+
+  baseEventSchedule.push(startEvent);
+
+  return baseEventSchedule;
 }
 
-export { generateKey }
+export { generateKey, createBaseEventSchedule };

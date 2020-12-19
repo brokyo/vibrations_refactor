@@ -4,6 +4,7 @@ import {
   baseEmitterDefaults,
   melodicEmitterDefaults
 } from "../config/instrument-config.js";
+import { waveConfig, eventRanges } from "@/config/wave-config.js";
 
 // `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
 ///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere
@@ -165,6 +166,120 @@ class MelodicEmitter {
       this.voice.volumeNodes[index].set({
         volume: config.volume
       });
+    });
+  }
+
+  generateEventConfig(key) {
+    let eventConfig = {
+      pitch: _.sample(key.pitches),
+      attack: _.random(eventRanges.attack.min, eventRanges.attack.max).toFixed(
+        2
+      ),
+      sustain: _.random(
+        eventRanges.sustain.min,
+        eventRanges.sustain.max
+      ).toFixed(2),
+      release: _.random(
+        eventRanges.release.min,
+        eventRanges.release.max
+      ).toFixed(2),
+      rest: _.random(eventRanges.rest.min, eventRanges.rest.max).toFixed(2)
+    };
+
+    return eventConfig;
+  }
+
+  createAttackEvent(eventConfig, startShift) {
+    var attackEvent = new Tone.Event(time => {
+      let emitter = this;
+      toneAttackEvent(eventConfig, time, emitter);
+      p5AttackEvent(eventConfig, emitter);
+    });
+    attackEvent.type = `attack`;
+    attackEvent.time = 0;
+    attackEvent.degree = eventConfig.pitch;
+    attackEvent.start(Tone.Time().now() + startShift);
+    return attackEvent;
+
+    function toneAttackEvent(eventConfig, time, emitter) {
+      emitter.voice.oscs.forEach(osc => {
+        osc.frequency.linearRampToValueAtTime(
+          Tone.Frequency(eventConfig.pitch).toFrequency(),
+          time + emitter.voice.portamento
+        );
+      });
+
+      emitter.voice.envs.forEach(env => {
+        env.set({ attack: eventConfig.attack, release: eventConfig.release });
+        env.triggerAttack(`+0`, eventConfig.velocity);
+      });
+    }
+
+    function p5AttackEvent(eventConfig, emitter) {
+      emitter.color.changing = true;
+      emitter.color.start = emitter.color.current;
+      emitter.color.end = emitter.webColor;
+      emitter.color.iteratorStep = 1 / (eventConfig.attack * 30);
+    }
+  }
+
+  createReleaseEvent(eventConfig, startShift) {
+    let releaseEvent = new Tone.Event(time => {
+      console.log(`release`);
+      toneReleaseEvent();
+      p5ReleaseEvent(eventConfig);
+    });
+    releaseEvent.time = 0;
+    releaseEvent.type = `release`;
+    releaseEvent.start(Tone.Time().now() + startShift);
+
+    return releaseEvent;
+
+    function toneReleaseEvent() {
+      console.log(this);
+      this.voice.envs.forEach(env => {
+        env.triggerRelease();
+      });
+    }
+
+    function p5ReleaseEvent(eventConfig) {
+      this.color.changing = true;
+      this.color.start = this.color.current;
+      // this.color.end = baseSynth.color.web;
+      this.color.iteratorStep = 1 / (eventConfig.release * 30);
+    }
+  }
+
+  createCompletedEvent(eventConfig, startShift) {
+    let endEvent = new Tone.Event(time => {
+      this.active = false;
+      console.log(`im done`);
+    });
+  }
+
+  generateWave(key) {
+    let waveEventsArray = [];
+    let startShift = 0;
+
+    var hack = [{}, {}, {}, {}, {}, {}];
+
+    hack.forEach(async _ => {
+      let eventConfig = this.generateEventConfig(key);
+      let attackEvent = this.createAttackEvent(eventConfig, startShift);
+      waveEventsArray.push(attackEvent);
+      startShift += eventConfig.attack + eventConfig.sustain;
+      let releaseEvent = this.createReleaseEvent(eventConfig, startShift);
+      waveEventsArray.push(releaseEvent);
+      startShift += eventConfig.release + eventConfig.rest;
+    });
+
+    return waveEventsArray;
+  }
+
+  scheduleWave(key, timeline) {
+    let schedule = this.generateWave(key);
+    schedule.forEach(event => {
+      timeline.add(event);
     });
   }
 }

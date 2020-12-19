@@ -9,7 +9,11 @@
 
 <script>
 import * as Tonal from "@tonaljs/tonal";
-import { generateKey } from "@/modules/scheduler.js"
+import {
+  generateKey,
+  createBaseEventSchedule,
+  createMelodicEventSchedule
+} from "@/modules/scheduler.js";
 
 let Tone, p5;
 export default {
@@ -32,7 +36,8 @@ export default {
         configured: false,
         baseToneEmitter: null,
         melodicToneEmitters: [],
-        toneSpace: {}
+        toneSpace: {},
+        timeline: null
       },
       waveMeta: {
         key: {
@@ -101,6 +106,7 @@ export default {
       });
       this.toneMeta.initialized = true;
       Tone.Master.mute = true;
+      this.toneMeta.timeline = new Tone.Timeline();
 
       return true;
     },
@@ -142,7 +148,6 @@ export default {
     async configureHue() {
       // Hue logic here
       let hueVals = false;
-      console.log(hueVals);
       return true;
     },
     async configureTone() {
@@ -182,9 +187,19 @@ export default {
     },
     // Generate wave
     async generateWave() {
-      await this.generateUtterance();
-      await this.generateScale();
-      await this.generateEmitterTimbre();
+      let key = await generateKey();
+      this.setEmitterTimbres(key);
+
+      let baseToneEmitterSchedule = await createBaseEventSchedule(
+        key,
+        this.toneMeta.baseToneEmitter
+      );
+
+      this.scheduleBaseToneEmitter(baseToneEmitterSchedule);
+
+      this.toneMeta.melodicToneEmitters.forEach(emitter => {
+        emitter.scheduleWave(key, this.toneMeta.timeline);
+      });
     },
     async generateUtterance() {
       let utterance = await import(`@/modules/utterance-generator.js`).then(
@@ -197,26 +212,32 @@ export default {
 
       return true;
     },
-    async generateEmitterTimbre() {
+    // TODO: Move all emitter stuff into components?
+    async setEmitterTimbres(key) {
       // Change baseToneEmitter voice
-      if (this.waveMeta.type == `major`) {
+      if (key.type == `major`) {
         let partials = [];
         this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
           voice.set({ type: partials });
         });
-      } else if (this.waveMeta.type == `minor`) {
+      } else if (key.type == `minor`) {
         let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
         this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
           voice.set({ partials: partials });
         });
       }
-      ``;
 
-      // Change formant
+      // Change melodicToneEmitter formant
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        emitter.changeFormant(this.waveMeta.key.formant.filters);
+        emitter.changeFormant(key.formant.filters);
       });
     },
+    scheduleBaseToneEmitter(schedule) {
+      schedule.forEach(event => {
+        this.toneMeta.timeline.add(event);
+      });
+    },
+    melodicToneEmittersSchedule(schedule) {},
     // Schedule wave
     scheduleWave() {
       //
@@ -238,16 +259,16 @@ export default {
       // console.table(waveMeta);
     },
     startWave() {
-      console.log(Tone.Master.mute);
-      this.toneMeta.baseToneEmitter.synth.triggerAttack(
-        this.waveMeta.key.tonic
-      );
+      Tone.Transport.start();
     }
   }
 };
 </script>
 
 <style lang="scss">
+html {
+  background-color: black;
+}
 .start-screen {
   color: red;
 }
