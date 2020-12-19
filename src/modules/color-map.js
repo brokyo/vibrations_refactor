@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 const colorMap = [
   {
     note: `C`,
@@ -86,4 +88,8 @@ const colorMap = [
   }
 ];
 
-export { colorMap };
+function associateNoteAndColor(note) {
+  return _.find(colorMap, {note: note.slice(0, -1)})
+}
+
+export { associateNoteAndColor };

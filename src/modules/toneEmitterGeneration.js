@@ -5,6 +5,7 @@ import {
   melodicEmitterDefaults
 } from "../config/instrument-config.js";
 import { eventRanges } from "@/config/wave-config.js";
+import { associateNoteAndColor } from "./color-map.js";
 
 // `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
 ///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere
@@ -218,7 +219,7 @@ class MelodicEmitter {
     function p5AttackEvent(eventConfig, emitter) {
       emitter.color.changing = true;
       emitter.color.start = emitter.color.current;
-      emitter.color.end = emitter.webColor;
+      emitter.color.end = associateNoteAndColor(eventConfig.pitch).webColor;
       emitter.color.iteratorStep = 1 / (eventConfig.attack * 30);
     }
   }
