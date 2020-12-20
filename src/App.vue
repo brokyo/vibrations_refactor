@@ -1,16 +1,12 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Listen</router-link> |
-      <router-link to="/about">Configure</router-link>
-    </div>
     <router-view />
   </div>
 </template>
 
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Abel;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

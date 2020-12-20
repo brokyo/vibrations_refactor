@@ -47,25 +47,4 @@ async function generateKey() {
   return key;
 }
 
-async function createBaseEventSchedule(key, baseEmitter) {
-  let Tone;
-  let baseEventSchedule = [];
-
-  Tone = await import(`tone`).then(module => {
-    return module.default;
-  });
-
-  let startEvent = new Tone.Event(time => {
-    baseEmitter.synth.triggerAttack(key.tonic);
-  });
-  startEvent.type = `base start`;
-  startEvent.time = 0;
-  startEvent.note = key.tonic;
-  startEvent.section = `base`;
-
-  baseEventSchedule.push(startEvent);
-
-  return baseEventSchedule;
-}
-
-export { generateKey, createBaseEventSchedule };
+export { generateKey };

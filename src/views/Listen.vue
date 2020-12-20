@@ -1,20 +1,44 @@
 <template>
   <div>
-    <div class="start-screen">
-      <div class="start-screen__button" @click="enterSpace">Enter Space</div>
-      <div id="canvas-holder"></div>
+    <div id="about-banner" v-if="!started">
+      <p class="header">
+        <span class="title">Vibrations</span> is a tool for cybermystic
+        contemplation.
+      </p>
+      <p class="subtext">
+        <span class="title">Vibrations</span> helps the universe communicate
+        through synchronicity by combining waves of color and sound with
+        AI-generated text. Each instance is unique to you, now.
+      </p>
+      <p class="subtext">Please use it when you're getting lost.</p>
+      <p class="subtext">
+        Language model trained on a cyber new age corpus and sound-to-light
+        correspondence based on mystical 1900s system.
+        <a
+          class="blogpost"
+          href="https://github.com/brokyo/vibrations"
+          target="_blank"
+          >[README]</a
+        >
+      </p>
+
+      <div id="start-button" @click="enterSpace">
+        <span>it only works if you believe</span>
+      </div>
     </div>
+    <div id="canvas-holder"></div>
   </div>
 </template>
 
 <script>
-import { generateKey, createBaseEventSchedule } from "@/modules/scheduler.js";
+import { generateKey } from "@/modules/scheduler.js";
 
 let Tone, p5;
 export default {
   name: `Listen`,
   data: function() {
     return {
+      started: false,
       p5Meta: {
         initialized: false,
         configured: false,
@@ -46,7 +70,7 @@ export default {
           type: null,
           text: null
         },
-        activeCard: {}
+        activeCard: null
       }
     };
   },
@@ -56,12 +80,15 @@ export default {
       // TODO: Error handling
       await this.initLibraries();
       await this.configureLibraries();
+
+      await this.generateUtterance();
       await this.generateWave();
-      await this.scheduleWave();
+
+      this.waveMeta.activeCard = `title`;
+      this.started = true;
 
       // TODO: Sleeping because Tone.JS pops otherwise
       await this.sleep(2500);
-      Tone.Master.mute = false;
       await this.startWave();
     },
     // Utilities
@@ -135,6 +162,7 @@ export default {
 
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
+      vibrationCanvas.baseToneEmitter = this.baseToneEmitter;
       vibrationCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
       vibrationCanvas.waveMeta = this.waveMeta;
 
@@ -147,7 +175,7 @@ export default {
     },
     async configureTone() {
       // Get configured instruments
-      let emitterGenerator = await import(
+      let melodicEmitterGenerator = await import(
         `@/modules/toneEmitterGeneration.js`
       ).then(module => {
         return module;
@@ -155,11 +183,17 @@ export default {
 
       this.$_.times(this.hueMeta.lightArray.length, () => {
         this.toneMeta.melodicToneEmitters.push(
-          emitterGenerator.createMelodicToneEmitter()
+          melodicEmitterGenerator.createMelodicToneEmitter()
         );
       });
 
-      this.toneMeta.baseToneEmitter = emitterGenerator.createBaseToneEmitter();
+      let baseEmitterGenerator = await import(
+        `@/instruments/base-emitter.js`
+      ).then(module => {
+        return module;
+      });
+
+      this.toneMeta.baseToneEmitter = baseEmitterGenerator.createBaseEmitter();
 
       let spaceGenerator = await import(
         `@/modules/toneSpaceGeneration.js`
@@ -183,17 +217,12 @@ export default {
     // Generate wave
     async generateWave() {
       let key = await generateKey();
-      this.setEmitterTimbres(key);
-
-      let baseToneEmitterSchedule = await createBaseEventSchedule(
-        key,
-        this.toneMeta.baseToneEmitter
-      );
-
-      this.scheduleBaseToneEmitter(baseToneEmitterSchedule);
+      this.toneMeta.baseToneEmitter.updateKey(key);
+      this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
 
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        emitter.scheduleWave(key, this.toneMeta.timeline);
+        emitter.updateKey(key);
+        emitter.scheduleEvents(this.toneMeta.timeline);
       });
     },
     async generateUtterance() {
@@ -202,71 +231,172 @@ export default {
           return module.getUtterance();
         }
       );
-
       this.waveMeta.utterance = utterance;
 
       return true;
     },
-    // TODO: Move all emitter stuff into components?
-    async setEmitterTimbres(key) {
-      // Change baseToneEmitter voice
-      if (key.type == `major`) {
-        let partials = [];
-        this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
-          voice.set({ type: partials });
-        });
-      } else if (key.type == `minor`) {
-        let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
-        this.toneMeta.baseToneEmitter.synth.voices.forEach(voice => {
-          voice.set({ partials: partials });
-        });
-      }
-
-      // Change melodicToneEmitter formant
-      this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        emitter.changeFormant(key.formant.filters);
-      });
-    },
-    scheduleBaseToneEmitter(schedule) {
-      schedule.forEach(event => {
-        this.toneMeta.timeline.add(event);
-      });
-    },
-    scheduleWave() {
-      //
-      // Tone.Master.mute = false
-      // this.toneMeta.baseToneEmitter.synth.triggerAttack(this.waveMeta.key.tonic);
-      // activeCard = `title`;
-      // setTimeout(() => {
-      //   activeCard = `performance`;
-      //   for (let i = 0; i < sections.length; i++) {
-      //     sections[i].active = true;
-      //     sections[i].color.iteratorStep =
-      //       1 / (baseSynthConfig.synth.envelope.attack * fps);
-      //     sections[i].color.start = `#000000`;
-      //     sections[i].color.end = baseSynth.color.web;
-      //     sections[i].color.changing = true;
-      //     scheduleEvents(i);
-      //   }
-      // }, 11000);
-      // console.table(waveMeta);
-    },
-    startWave() {
+    async startWave() {
+      Tone.Master.mute = false;
+      await this.sleep(5000);
+      this.waveMeta.activeCard = `performance`;
       Tone.Transport.start();
+    },
+    endWave() {
+      // release base emitter
+      // rest five seconds
+      // startWave()
     }
   }
 };
 </script>
 
 <style lang="scss">
-html {
-  background-color: black;
-}
-.start-screen {
-  color: red;
+body {
+  display: flex;
+  margin: 0;
+  align-items: center;
+  justify-content: center;
 }
 
-.start-screen__button {
-  color: red;
+.header {
+  font-size: 38px;
+}
+
+#download-button {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  padding: 10px;
+  border: 1px solid black;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#download-button:hover {
+  background-color: white;
+}
+
+#download-button a {
+  color: black;
+  text-decoration: none;
+}
+
+.title {
+  font-weight: 900;
+}
+
+.subtext {
+  font-size: 20px;
+}
+
+.blogpost {
+  color: black;
+}
+
+.spacer {
+  margin-top: 26px;
+}
+
+#fullscreen-button {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  height: 30px;
+  width: 30px;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+#fullscreen-button:hover {
+  opacity: 1;
+}
+
+#screenshot-button {
+  position: fixed;
+  top: 6px;
+  right: 40px;
+  height: 40px;
+  width: 40px;
+  z-index: 1;
+  opacity: 0.3;
+}
+
+#screenshot-button:hover {
+  opacity: 1;
+}
+
+#info-button {
+  position: fixed;
+  height: 30px;
+  width: 30px;
+  top: 0;
+  right: 80px;
+  top: 10px;
+  z-index: 1;
+}
+
+#close-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 40px;
+  width: 40px;
+}
+
+#start-button {
+  width: 300px;
+  height: 50px;
+  text-align: center;
+  z-index: 1;
+  margin: 140px auto 0px auto;
+  border: 2px solid black;
+  cursor: pointer;
+}
+
+#start-button:hover {
+  background-color: white;
+}
+
+#start-button span {
+  font-weight: 900;
+  font-size: 22px;
+  line-height: 50px;
+}
+
+#canvas-holder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+#about-banner {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #dbd9d7;
+  padding-top: 20px;
+  z-index: 2;
+}
+
+#about-banner p {
+  margin: 0 auto;
+  padding-top: 12px;
+  width: 500px;
+}
+
+#logo {
+  position: fixed;
+  bottom: 0px;
+  right: 20px;
+  height: 120px;
+  width: 120px;
+  opacity: 0.3;
+}
+
+#logo:hover {
+  opacity: 1;
 }
 </style>

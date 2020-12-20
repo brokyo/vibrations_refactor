@@ -1,46 +1,10 @@
 import * as Tone from "tone";
 import _ from "lodash";
 import {
-  baseEmitterDefaults,
   melodicEmitterDefaults
 } from "../config/instrument-config.js";
 import { eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "./color-map.js";
-
-// `BaseEmitter` is the underlying drone. It's a polysynth made up one one complex
-///// waveform and a bunch of effects. Takes a config or uses defaults set elsewhere
-class BaseEmitter {
-  constructor(userConfig) {
-    let config = userConfig == undefined ? baseEmitterDefaults : userConfig;
-    this.color = {
-      web: { h: 0, s: 0, v: 0 },
-      hue: { h: 0, s: 0, v: 0 }
-    };
-    this.synth = new Tone.PolySynth(10, Tone.AMSynth);
-    this.synth.set(config.synth);
-    this.tremolo = new Tone.Tremolo(config.tremolo);
-    this.vibrato = new Tone.Vibrato(config.vibrato);
-    this.phaser = new Tone.Phaser(config.phaser);
-    this.feedbackDelay = new Tone.FeedbackDelay(config.feedbackDelay);
-    this.chorus = new Tone.Chorus(config.chorus);
-    this.EQ3 = new Tone.EQ3(config.EQ3);
-    this.widener = new Tone.StereoWidener(config.widener);
-    this.panner = new Tone.AutoPanner(config.panner);
-    this.out = new Tone.Gain(config.out);
-
-    this.synth.chain(
-      this.tremolo,
-      this.vibrato,
-      this.phaser,
-      this.feedbackDelay,
-      this.chorus,
-      this.EQ3,
-      this.widener,
-      this.panner,
-      this.out
-    );
-  }
-}
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
@@ -52,11 +16,12 @@ class MelodicEmitter {
     ///////////////
     this.id = null;
     this.active = false;
+    this.key = {};
 
     ///////////
     // COLOR //
     ///////////
-    this.tonicColor = {h: 0, s: 0, v:0};
+    this.tonicColor = { h: 0, s: 0, v: 0 };
     this.color = {
       changing: false,
       start: { h: 0, s: 0, v: 0 },
@@ -148,6 +113,11 @@ class MelodicEmitter {
     this.voice.lineOut = new Tone.Gain(config.lineOut.gain);
 
     this.voice.formantOut.chain(this.voice.position, this.voice.lineOut);
+  }
+
+  updateKey(key) {
+    this.key = key;
+    this.changeFormant(key.formant.filters);
   }
 
   start() {
@@ -243,20 +213,49 @@ class MelodicEmitter {
     }
   }
 
-  createCompletedEvent(eventConfig, startShift) {
-    let endEvent = new Tone.Event(time => {
-      this.active = false;
-    });
-  }
+  // createCompletedEvent(eventConfig, startShift) {
+  //   let finishedSections = _.filter(sections, { active: false });
+
+  //   if (finishedSections.length === 4) {
+  //     let releaseEvent = new Tone.Event(time => {
+  //       baseSynth.synth.releaseAll();
+  //     });
+  //     let startShift = 0;
+  //     releaseEvent.time = startShift;
+  //     releaseEvent.start(Tone.Time().now() + startShift);
+  //     releaseEvent.section = `base`;
+  //     timeline.add(releaseEvent);
+
+  //     let waveEnd = new Tone.Event(time => {
+  //       endWave();
+  //     });
+  //     startShift += baseSynthConfig.synth.envelope.release + 5;
+  //     waveEnd.time = 0;
+  //     waveEnd.start(Tone.Time().now() + startShift);
+  //     waveEnd.section = `base`;
+  //     timeline.add(waveEnd);
+
+  //     let newWaveEvent = new Tone.Event(time => {
+  //       newWave();
+  //     });
+  //     startShift += newWaveConfig.waveRest;
+  //     newWaveEvent.time = 0;
+  //     newWaveEvent.start(Tone.Time().now() + startShift);
+  //     newWaveEvent.section = `base`;
+  //     timeline.add(newWaveEvent);
+  //   }
+  // }
 
   generateWave(key) {
     let tonicColor = associateNoteAndColor(key.tonic).webColor;
-    this.tonicColor = {h: tonicColor.h, s: tonicColor.s, v: 0.15}
+    this.tonicColor = { h: tonicColor.h, s: tonicColor.s, v: 0.15 };
     let waveEventsArray = [];
-    let startShift = 0;
 
+    // TODO: pull this out of a config
+    let startShift = 5;
+
+    // TODO: pull this out of a config
     var hack = [{}, {}, {}, {}, {}, {}];
-
     hack.forEach(async _ => {
       let eventConfig = this.generateEventConfig(key);
       let attackEvent = this.createAttackEvent(eventConfig, startShift);
@@ -270,38 +269,16 @@ class MelodicEmitter {
     return waveEventsArray;
   }
 
-  scheduleWave(key, timeline) {
-    let schedule = this.generateWave(key);
+  scheduleEvents(timeline) {
+    let schedule = this.generateWave(this.key);
     schedule.forEach(event => {
       timeline.add(event);
     });
   }
 }
 
-function createBaseToneEmitter(config) {
-  return new BaseEmitter(config);
-}
-
-// if (this.hueIntegration) {
-//   this.choirSections = this.$_.times(4, i => {
-//     return new module.ChoirSection({
-//       id: this.lightArray[i].id,
-//       oscCount: 10,
-//       position: this.lightArray[i].position
-//     });
-//   });
-// } else {
-//   let sectionPositions = [-1, -0.5, 0.5, 1];
-//   this.choirSections = this.$_.times(4, i => {
-//     return new module.ChoirSection({
-//       id: null,
-//       oscCount: 10,
-//       position: sectionPositions[i]
-//     });
-//   });
-// }
 function createMelodicToneEmitter(config) {
   return new MelodicEmitter(config);
 }
 
-export { createBaseToneEmitter, createMelodicToneEmitter };
+export { createMelodicToneEmitter };
