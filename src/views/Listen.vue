@@ -27,6 +27,8 @@
       </div>
     </div>
     <div id="canvas-holder"></div>
+  	<img id="screenshot-button" @click="saveImage" src="@/assets/camera.svg" />
+  	<img id="fullscreen-button" @click="toggleFullScreen" src="@/assets/fullscreen.svg" />
   </div>
 </template>
 
@@ -42,7 +44,8 @@ export default {
         initialized: false,
         configured: false,
         color: null,
-        activeColorArray: []
+        activeColorArray: [],
+        canvas: {},
       },
       hueMeta: {
         initialized: false,
@@ -100,6 +103,18 @@ export default {
       // TODO: Sleeping because Tone.JS pops otherwise
       await this.sleep(2500);
       await this.startWave();
+    },
+    saveImage() {
+      p5.save(this.p5Meta.canvas, 'please_remember', 'png')
+    },
+    toggleFullScreen() {
+      if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen();
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen(); 
+        }
+      }
     },
     // Utilities
     async sleep(ms) {
@@ -169,6 +184,7 @@ export default {
       this.$_.times(this.hueMeta.lightArray.length, () => {
         this.p5Meta.activeColorArray.push(defaultColorObject);
       });
+      this.p5Meta.canvas = vibrationCanvas;
 
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
