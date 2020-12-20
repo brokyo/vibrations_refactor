@@ -1,8 +1,6 @@
 import * as Tone from "tone";
 import _ from "lodash";
-import {
-  melodicEmitterDefaults
-} from "../config/instrument-config.js";
+import { melodicEmitterDefaults } from "../config/instrument-config.js";
 import { eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "./color-map.js";
 
@@ -15,7 +13,7 @@ class MelodicEmitter {
     // UNIVERSAL //
     ///////////////
     this.id = null;
-    this.active = false;
+    this.active = null;
     this.key = {};
 
     ///////////
@@ -117,6 +115,8 @@ class MelodicEmitter {
 
   updateKey(key) {
     this.key = key;
+    let tonicColor = associateNoteAndColor(key.tonic).webColor;
+    this.tonicColor = { h: tonicColor.h, s: tonicColor.s, v: 0.15 };
     this.changeFormant(key.formant.filters);
   }
 
@@ -213,42 +213,49 @@ class MelodicEmitter {
     }
   }
 
-  // createCompletedEvent(eventConfig, startShift) {
-  //   let finishedSections = _.filter(sections, { active: false });
+  createCompletedEvent(startShift) {
+    let completedEvent = new Tone.Event(time => {
+      this.active = false;
+      this.tonicColor = {h: 0, s: 0, v: 0}
+    });
+    completedEvent.time = 0;
+    completedEvent.section = `melodic`;
+    completedEvent.start(Tone.Time().now() + startShift);
+    return completedEvent;
 
-  //   if (finishedSections.length === 4) {
-  //     let releaseEvent = new Tone.Event(time => {
-  //       baseSynth.synth.releaseAll();
-  //     });
-  //     let startShift = 0;
-  //     releaseEvent.time = startShift;
-  //     releaseEvent.start(Tone.Time().now() + startShift);
-  //     releaseEvent.section = `base`;
-  //     timeline.add(releaseEvent);
+    // let finishedSections = _.filter(sections, { active: false });
 
-  //     let waveEnd = new Tone.Event(time => {
-  //       endWave();
-  //     });
-  //     startShift += baseSynthConfig.synth.envelope.release + 5;
-  //     waveEnd.time = 0;
-  //     waveEnd.start(Tone.Time().now() + startShift);
-  //     waveEnd.section = `base`;
-  //     timeline.add(waveEnd);
+    // if (finishedSections.length === 4) {
+    //   let releaseEvent = new Tone.Event(time => {
+    //     baseSynth.synth.releaseAll();
+    //   });
+    //   let startShift = 0;
+    //   releaseEvent.time = startShift;
+    //   releaseEvent.start(Tone.Time().now() + startShift);
+    //   releaseEvent.section = `base`;
+    //   timeline.add(releaseEvent);
 
-  //     let newWaveEvent = new Tone.Event(time => {
-  //       newWave();
-  //     });
-  //     startShift += newWaveConfig.waveRest;
-  //     newWaveEvent.time = 0;
-  //     newWaveEvent.start(Tone.Time().now() + startShift);
-  //     newWaveEvent.section = `base`;
-  //     timeline.add(newWaveEvent);
-  //   }
-  // }
+    //   let waveEnd = new Tone.Event(time => {
+    //     endWave();
+    //   });
+    //   startShift += baseSynthConfig.synth.envelope.release + 5;
+    //   waveEnd.time = 0;
+    //   waveEnd.start(Tone.Time().now() + startShift);
+    //   waveEnd.section = `base`;
+    //   timeline.add(waveEnd);
+
+    //   let newWaveEvent = new Tone.Event(time => {
+    //     newWave();
+    //   });
+    //   startShift += newWaveConfig.waveRest;
+    //   newWaveEvent.time = 0;
+    //   newWaveEvent.start(Tone.Time().now() + startShift);
+    //   newWaveEvent.section = `base`;
+    //   timeline.add(newWaveEvent);
+    // }
+  }
 
   generateWave(key) {
-    let tonicColor = associateNoteAndColor(key.tonic).webColor;
-    this.tonicColor = { h: tonicColor.h, s: tonicColor.s, v: 0.15 };
     let waveEventsArray = [];
 
     // TODO: pull this out of a config
@@ -265,6 +272,8 @@ class MelodicEmitter {
       waveEventsArray.push(releaseEvent);
       startShift += eventConfig.release + eventConfig.rest;
     });
+    let completedEvent = this.createCompletedEvent(startShift);
+    waveEventsArray.push(completedEvent);
 
     return waveEventsArray;
   }
@@ -274,6 +283,7 @@ class MelodicEmitter {
     schedule.forEach(event => {
       timeline.add(event);
     });
+    this.active = true;
   }
 }
 

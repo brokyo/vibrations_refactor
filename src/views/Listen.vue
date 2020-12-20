@@ -32,7 +32,6 @@
 
 <script>
 import { generateKey } from "@/modules/scheduler.js";
-
 let Tone, p5;
 export default {
   name: `Listen`,
@@ -74,17 +73,28 @@ export default {
       }
     };
   },
+  computed: {
+    finishedSections() {
+      return this.$_.filter(this.toneMeta.melodicToneEmitters, {
+        active: false
+      }).length;
+    }
+  },
+  watch: {
+    finishedSections() {
+      if (this.finishedSections == this.toneMeta.melodicToneEmitters.length) {
+        this.endWave();
+      }
+    }
+  },
   methods: {
     //USER ACTIONS
     async enterSpace() {
       // TODO: Error handling
       await this.initLibraries();
       await this.configureLibraries();
-
-      await this.generateUtterance();
       await this.generateWave();
 
-      this.waveMeta.activeCard = `title`;
       this.started = true;
 
       // TODO: Sleeping because Tone.JS pops otherwise
@@ -216,6 +226,7 @@ export default {
     },
     // Generate wave
     async generateWave() {
+      await this.generateUtterance();
       let key = await generateKey();
       this.toneMeta.baseToneEmitter.updateKey(key);
       this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
@@ -224,6 +235,7 @@ export default {
         emitter.updateKey(key);
         emitter.scheduleEvents(this.toneMeta.timeline);
       });
+      this.waveMeta.activeCard = `title`;
     },
     async generateUtterance() {
       let utterance = await import(`@/modules/utterance-generator.js`).then(
@@ -241,17 +253,26 @@ export default {
       this.waveMeta.activeCard = `performance`;
       Tone.Transport.start();
     },
-    endWave() {
-      // release base emitter
-      // rest five seconds
-      // startWave()
+    async endWave() {
+      // TODO: This should be the length of the final release
+      await this.sleep(7500);
+      this.toneMeta.baseToneEmitter.synth.releaseAll();
+      await this.sleep(7500);
+      this.generateWave();
+      this.startWave();
     }
   }
 };
 </script>
 
 <style lang="scss">
+@font-face {
+  font-family: "Abel";
+  src: url("/fonts/Abel-Regular.ttf");
+}
+
 body {
+  font-family: "Abel";
   display: flex;
   margin: 0;
   align-items: center;

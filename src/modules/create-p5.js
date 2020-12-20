@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 
 const s = sketch => {
   sketch.preload = () => {
-    // sketch.font = sketch.loadFont("assets/Abel-Regular.ttf");
+    sketch.font = sketch.loadFont("/fonts/Abel-Regular.ttf");
   };
 
   sketch.setup = () => {
@@ -40,7 +40,7 @@ const s = sketch => {
     let average = chroma.average(colors).hex();
     sketch.background(average);
 
-    // sketch.textFont(sketch.font);
+    sketch.textFont(sketch.font);
     sketch.fill(255);
 
     sketch.textAlign(sketch.CENTER);

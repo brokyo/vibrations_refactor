@@ -105,7 +105,7 @@ const groups = [
       },
       {
         type: `long`,
-        text: `Affirmation: All Life \nAffirmation: All Truth \nAffirmation: All Time \nAffirmation: The Way \nAffirmation: Beautiful Things \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Our destiny is to become\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:\nAffirmation:`
+        text: `Affirmation: All Life \nAffirmation: All Truth \nAffirmation: All Time \nAffirmation: The Way \nAffirmation: Beautiful Things \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Rave on \nAffirmation: Our destiny is to become`
       }
     ]
   },
