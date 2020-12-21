@@ -89,7 +89,7 @@ const colorMap = [
 ];
 
 function associateNoteAndColor(note) {
-  return _.find(colorMap, {note: note.slice(0, -1)})
+  return _.find(colorMap, { note: note.slice(0, -1) });
 }
 
 export { associateNoteAndColor };

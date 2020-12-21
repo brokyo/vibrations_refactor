@@ -33,7 +33,9 @@
       @click="toggleFullScreen"
       src="@/assets/fullscreen.svg"
     />
-    <a href="https://awakening.systems" target="_blank"><img id="logo" src="@/assets/as.svg" /></a>
+    <a href="https://awakening.systems" target="_blank"
+      ><img id="logo" src="@/assets/as.svg"
+    /></a>
   </div>
 </template>
 
@@ -48,8 +50,7 @@ export default {
         initialized: false,
         configured: false,
         color: null,
-        activeColorArray: [],
-        canvas: {}
+        activeColorArray: []
       },
       hueMeta: {
         initialized: false,
@@ -146,7 +147,7 @@ export default {
     },
     async initHue() {
       this.hueMeta.integration = false;
-      this.hueMeta.lightArray = [{}, {}, {}];
+      this.hueMeta.lightArray = [{}, {}, {}, {}];
       this.hueMeta.initialized = true;
 
       return true;
@@ -179,7 +180,7 @@ export default {
       });
 
       let defaultColorObject = {
-        changing: true,
+        changing: false,
         start: `#000000`,
         end: `#000000`,
         iteratorStep: 0
@@ -191,6 +192,7 @@ export default {
 
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
+      vibrationCanvas.activeColorArray = this.p5Meta.activeColorArray;
       vibrationCanvas.baseToneEmitter = this.baseToneEmitter;
       vibrationCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
       vibrationCanvas.waveMeta = this.waveMeta;
@@ -244,21 +246,6 @@ export default {
       this.toneMeta.toneSpace.out.connect(Tone.Master);
     },
     // Generate wave
-    async generateWave() {
-      await this.generateUtterance();
-
-      let key = await import(`@/config/key-config.js`).then(module => {
-        return module.generateKey();
-      });
-      this.toneMeta.baseToneEmitter.updateKey(key);
-      this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
-
-      this.toneMeta.melodicToneEmitters.forEach(emitter => {
-        emitter.updateKey(key);
-        emitter.scheduleEvents(this.toneMeta.timeline);
-      });
-      this.waveMeta.activeCard = `title`;
-    },
     async generateUtterance() {
       let utterance = await import(`@/modules/utterance-generator.js`).then(
         module => {
@@ -268,6 +255,24 @@ export default {
       this.waveMeta.utterance = utterance;
 
       return true;
+    },
+    async generateWave() {
+      await this.generateUtterance();
+
+      this.waveMeta.key = await import(`@/config/key-config.js`).then(
+        module => {
+          return module.generateKey();
+        }
+      );
+
+      this.toneMeta.baseToneEmitter.updateKey(this.waveMeta.key);
+      this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
+
+      this.toneMeta.melodicToneEmitters.forEach(emitter => {
+        emitter.updateKey(this.waveMeta.key);
+        emitter.scheduleEvents(this.toneMeta.timeline);
+      });
+      this.waveMeta.activeCard = `title`;
     },
     async startWave() {
       Tone.Master.mute = false;

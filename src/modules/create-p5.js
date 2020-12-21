@@ -2,7 +2,7 @@ import chroma from "chroma-js";
 
 const s = sketch => {
   sketch.preload = () => {
-    sketch.font = sketch.loadFont("/fonts/Abel-Regular.ttf");
+    sketch.font = sketch.loadFont(`/fonts/Abel-Regular.ttf`);
   };
 
   sketch.setup = () => {
@@ -64,14 +64,18 @@ const s = sketch => {
     } else if (sketch.waveMeta.activeCard === `title`) {
       sketch.textSize(65);
       sketch.text(
-        `awakening sytems: ${sketch.waveMeta.utterance.prefix}`,
+        `awakening sytem: ${sketch.waveMeta.utterance.prefix}`,
         sketch.windowWidth / 2,
         sketch.windowHeight / 2
       );
     }
 
     sketch.textSize(20);
-    sketch.text('vibrations.awakening.systems', sketch.windowWidth / 2, sketch.windowHeight - 40)
+    sketch.text(
+      `vibrations.awakening.systems`,
+      sketch.windowWidth / 2,
+      sketch.windowHeight - 40
+    );
   };
 
   sketch.windowResized = () => {

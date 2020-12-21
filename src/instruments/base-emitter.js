@@ -1,6 +1,4 @@
 import * as Tone from "tone";
-import _ from "lodash";
-import { associateNoteAndColor } from "@/utilities/color-map.js";
 
 const baseEmitterDefaults = {
   synth: {
@@ -134,7 +132,7 @@ class BaseEmitter {
     schedule.push(startEvent);
 
     schedule.forEach(event => {
-        timeline.add(event);
+      timeline.add(event);
     });
   }
 }

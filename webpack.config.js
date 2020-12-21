@@ -5,8 +5,7 @@ module.exports = {
         test: /\.(ttf|otf|eot|woff|woff2)$/,
         use: {
           loader: `file-loader`,
-          options: 
-          {
+          options: {
             name: `assets/fonts/[name].[ext]`
           }
         }

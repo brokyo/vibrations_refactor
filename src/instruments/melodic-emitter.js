@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 import _ from "lodash";
-import { eventRanges } from "@/config/wave-config.js";
+import { waveConfig, eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "@/utilities/color-map.js";
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
@@ -240,54 +240,26 @@ class MelodicEmitter {
   createCompletedEvent(startShift) {
     let completedEvent = new Tone.Event(time => {
       this.active = false;
-      this.tonicColor = { h: 0, s: 0, v: 0 };
+      this.color.changing = true;
+      this.color.start = this.color.current;
+      this.color.end = `#000000`;
+      this.color.iteratorStep = 1 / 60;
     });
     completedEvent.time = 0;
     completedEvent.section = `melodic`;
     completedEvent.start(Tone.Time().now() + startShift);
     return completedEvent;
-
-    // let finishedSections = _.filter(sections, { active: false });
-
-    // if (finishedSections.length === 4) {
-    //   let releaseEvent = new Tone.Event(time => {
-    //     baseSynth.synth.releaseAll();
-    //   });
-    //   let startShift = 0;
-    //   releaseEvent.time = startShift;
-    //   releaseEvent.start(Tone.Time().now() + startShift);
-    //   releaseEvent.section = `base`;
-    //   timeline.add(releaseEvent);
-
-    //   let waveEnd = new Tone.Event(time => {
-    //     endWave();
-    //   });
-    //   startShift += baseSynthConfig.synth.envelope.release + 5;
-    //   waveEnd.time = 0;
-    //   waveEnd.start(Tone.Time().now() + startShift);
-    //   waveEnd.section = `base`;
-    //   timeline.add(waveEnd);
-
-    //   let newWaveEvent = new Tone.Event(time => {
-    //     newWave();
-    //   });
-    //   startShift += newWaveConfig.waveRest;
-    //   newWaveEvent.time = 0;
-    //   newWaveEvent.start(Tone.Time().now() + startShift);
-    //   newWaveEvent.section = `base`;
-    //   timeline.add(newWaveEvent);
-    // }
   }
 
   generateWave(key) {
     let waveEventsArray = [];
 
-    // TODO: pull this out of a config
-    let startShift = 5;
+    let startShift = _.random(
+      waveConfig.startShift.min,
+      waveConfig.startShift.max
+    );
 
-    // TODO: pull this out of a config
-    var hack = [{}, {}, {}, {}, {}, {}];
-    hack.forEach(async _ => {
+    for (let i = 0; i < waveConfig.notesInWave; i++) {
       let eventConfig = this.generateEventConfig(key);
       let attackEvent = this.createAttackEvent(eventConfig, startShift);
       waveEventsArray.push(attackEvent);
@@ -295,10 +267,11 @@ class MelodicEmitter {
       let releaseEvent = this.createReleaseEvent(eventConfig, startShift);
       waveEventsArray.push(releaseEvent);
       startShift += eventConfig.release + eventConfig.rest;
-    });
+    }
     let completedEvent = this.createCompletedEvent(startShift);
     waveEventsArray.push(completedEvent);
 
+    console.table(waveEventsArray);
     return waveEventsArray;
   }
 
