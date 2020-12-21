@@ -33,6 +33,7 @@
       @click="toggleFullScreen"
       src="@/assets/fullscreen.svg"
     />
+    <a href="https://awakening.systems" target="_blank"><img id="logo" src="@/assets/as.svg" /></a>
   </div>
 </template>
 
