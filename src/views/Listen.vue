@@ -27,8 +27,16 @@
       </div>
     </div>
     <div id="canvas-holder"></div>
-  	<img id="screenshot-button" @click="saveImage" src="@/assets/camera.svg" />
-  	<img id="fullscreen-button" @click="toggleFullScreen" src="@/assets/fullscreen.svg" />
+    <img 
+      id="screenshot-button" 
+      @click="saveImage" 
+      src="@/assets/camera.svg" 
+    />
+    <img
+      id="fullscreen-button"
+      @click="toggleFullScreen"
+      src="@/assets/fullscreen.svg"
+    />
   </div>
 </template>
 
@@ -45,7 +53,7 @@ export default {
         configured: false,
         color: null,
         activeColorArray: [],
-        canvas: {},
+        canvas: {}
       },
       hueMeta: {
         initialized: false,
@@ -105,14 +113,14 @@ export default {
       await this.startWave();
     },
     saveImage() {
-      p5.save(this.p5Meta.canvas, 'please_remember', 'png')
+      p5.save(this.p5Meta.canvas, `please_remember`, `png`);
     },
     toggleFullScreen() {
       if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen();
+        document.documentElement.requestFullscreen();
       } else {
         if (document.exitFullscreen) {
-          document.exitFullscreen(); 
+          document.exitFullscreen();
         }
       }
     },
@@ -202,14 +210,14 @@ export default {
     async configureTone() {
       // Get configured instruments
       let melodicEmitterGenerator = await import(
-        `@/modules/toneEmitterGeneration.js`
+        `@/instruments/melodic-emitter.js`
       ).then(module => {
         return module;
       });
 
       this.$_.times(this.hueMeta.lightArray.length, () => {
         this.toneMeta.melodicToneEmitters.push(
-          melodicEmitterGenerator.createMelodicToneEmitter()
+          melodicEmitterGenerator.createMelodicEmitter()
         );
       });
 
@@ -297,25 +305,6 @@ body {
 
 .header {
   font-size: 38px;
-}
-
-#download-button {
-  position: absolute;
-  bottom: 4px;
-  right: 4px;
-  padding: 10px;
-  border: 1px solid black;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-#download-button:hover {
-  background-color: white;
-}
-
-#download-button a {
-  color: black;
-  text-decoration: none;
 }
 
 .title {
@@ -419,6 +408,7 @@ body {
 }
 
 #about-banner p {
+  text-align: left;
   margin: 0 auto;
   padding-top: 12px;
   width: 500px;

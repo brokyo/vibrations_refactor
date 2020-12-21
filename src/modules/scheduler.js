@@ -1,6 +1,6 @@
 import { Scale, Note } from "@tonaljs/tonal";
 import _ from "lodash";
-import { getRandomFormant } from "@/config/instrument-config.js";
+import { getRandomFormant } from "@/config/formant-config.js";
 
 // Returns the key that the wave is played in
 async function generateKey() {

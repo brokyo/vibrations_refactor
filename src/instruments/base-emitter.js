@@ -1,6 +1,6 @@
 import * as Tone from "tone";
 import _ from "lodash";
-import { associateNoteAndColor } from "@/modules/color-map.js";
+import { associateNoteAndColor } from "@/utilities/color-map.js";
 
 const baseEmitterDefaults = {
   synth: {
