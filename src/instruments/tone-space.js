@@ -1,5 +1,5 @@
 import * as Tone from "tone";
-import { spaceConfigDefaults } from "../config/toneSpaceConfig.js";
+import { spaceConfigDefaults } from "../config/tone-space-config.js";
 
 function createToneSpace(userConfig) {
   let config = userConfig == undefined ? spaceConfigDefaults : userConfig;

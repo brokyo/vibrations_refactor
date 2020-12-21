@@ -41,7 +41,6 @@
 </template>
 
 <script>
-import { generateKey } from "@/modules/scheduler.js";
 let Tone, p5;
 export default {
   name: `Listen`,
@@ -230,7 +229,7 @@ export default {
       this.toneMeta.baseToneEmitter = baseEmitterGenerator.createBaseEmitter();
 
       let spaceGenerator = await import(
-        `@/modules/toneSpaceGeneration.js`
+        `@/instruments/tone-space.js`
       ).then(module => {
         return module;
       });
@@ -251,7 +250,10 @@ export default {
     // Generate wave
     async generateWave() {
       await this.generateUtterance();
-      let key = await generateKey();
+
+      let key = await import (`@/config/key-config.js`).then(module => {
+        return module.generateKey();
+      })
       this.toneMeta.baseToneEmitter.updateKey(key);
       this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
 
