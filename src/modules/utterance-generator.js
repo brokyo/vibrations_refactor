@@ -13,7 +13,7 @@ const groups = [
         text: `Reality is \n\nthe way it is.`
       },
       {
-        type: `short`,
+        type: `long`,
         text: `Reality is such a small thing in this chain of events that we should not get too attached to it`
       },
       {

@@ -27,11 +27,7 @@
       </div>
     </div>
     <div id="canvas-holder"></div>
-    <img 
-      id="screenshot-button" 
-      @click="saveImage" 
-      src="@/assets/camera.svg" 
-    />
+    <img id="screenshot-button" @click="saveImage" src="@/assets/camera.svg" />
     <img
       id="fullscreen-button"
       @click="toggleFullScreen"
@@ -112,7 +108,7 @@ export default {
       await this.startWave();
     },
     saveImage() {
-      p5.save(this.p5Meta.canvas, `please_remember`, `png`);
+      p5.saveCanvas(`#defaultCanvas0`, `please_remember`, `png`);
     },
     toggleFullScreen() {
       if (!document.fullscreenElement) {
@@ -191,7 +187,6 @@ export default {
       this.$_.times(this.hueMeta.lightArray.length, () => {
         this.p5Meta.activeColorArray.push(defaultColorObject);
       });
-      this.p5Meta.canvas = vibrationCanvas;
 
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
@@ -228,11 +223,11 @@ export default {
 
       this.toneMeta.baseToneEmitter = baseEmitterGenerator.createBaseEmitter();
 
-      let spaceGenerator = await import(
-        `@/instruments/tone-space.js`
-      ).then(module => {
-        return module;
-      });
+      let spaceGenerator = await import(`@/instruments/tone-space.js`).then(
+        module => {
+          return module;
+        }
+      );
 
       this.toneMeta.toneSpace = spaceGenerator.createToneSpace();
 
@@ -251,9 +246,9 @@ export default {
     async generateWave() {
       await this.generateUtterance();
 
-      let key = await import (`@/config/key-config.js`).then(module => {
+      let key = await import(`@/config/key-config.js`).then(module => {
         return module.generateKey();
-      })
+      });
       this.toneMeta.baseToneEmitter.updateKey(key);
       this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
 
@@ -305,24 +300,44 @@ body {
   justify-content: center;
 }
 
-.header {
-  font-size: 38px;
+#about-banner {
+  position: fixed;
+  text-align: left;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #dbd9d7;
+  padding-top: 20px;
+  z-index: 2;
+
+  .header {
+    font-size: 38px;
+    line-height: 1.2;
+    margin-bottom: 15px;
+  }
+
+  p {
+    margin: 0 auto;
+    padding-top: 12px;
+    width: 500px;
+  }
+  .subtext {
+    font-size: 22px;
+    line-height: 1.2;
+  }
+
+  .spacer {
+    margin-top: 26px;
+  }
+
+  .blogpost {
+    color: black;
+  }
 }
 
 .title {
   font-weight: 900;
-}
-
-.subtext {
-  font-size: 20px;
-}
-
-.blogpost {
-  color: black;
-}
-
-.spacer {
-  margin-top: 26px;
 }
 
 #fullscreen-button {
@@ -333,43 +348,25 @@ body {
   width: 30px;
   z-index: 1;
   opacity: 0.3;
+
+  hover {
+    opacity: 1;
+  }
 }
 
-#fullscreen-button:hover {
-  opacity: 1;
-}
+// #screenshot-button {
+//   position: fixed;
+//   top: 6px;
+//   right: 40px;
+//   height: 40px;
+//   width: 40px;
+//   z-index: 1;
+//   opacity: 0.3;
+// }
 
-#screenshot-button {
-  position: fixed;
-  top: 6px;
-  right: 40px;
-  height: 40px;
-  width: 40px;
-  z-index: 1;
-  opacity: 0.3;
-}
-
-#screenshot-button:hover {
-  opacity: 1;
-}
-
-#info-button {
-  position: fixed;
-  height: 30px;
-  width: 30px;
-  top: 0;
-  right: 80px;
-  top: 10px;
-  z-index: 1;
-}
-
-#close-button {
-  position: absolute;
-  right: 0;
-  top: 0;
-  height: 40px;
-  width: 40px;
-}
+// #screenshot-button:hover {
+//   opacity: 1;
+// }
 
 #start-button {
   width: 300px;
@@ -396,24 +393,6 @@ body {
   top: 0;
   left: 0;
   z-index: -1;
-}
-
-#about-banner {
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background-color: #dbd9d7;
-  padding-top: 20px;
-  z-index: 2;
-}
-
-#about-banner p {
-  text-align: left;
-  margin: 0 auto;
-  padding-top: 12px;
-  width: 500px;
 }
 
 #logo {
