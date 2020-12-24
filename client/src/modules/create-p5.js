@@ -10,6 +10,7 @@ const s = sketch => {
     var canvas = sketch.createCanvas(sketch.windowWidth, sketch.windowHeight);
     canvas.parent(`canvas-holder`);
     sketch.frameRate(30);
+    sketch.imageObject = canvas;
   };
 
   sketch.draw = () => {
