@@ -3,6 +3,7 @@ import _ from "lodash";
 import { waveConfig, eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "@/utilities/color-map.js";
 const baseUrl = `http://localhost:3000/`;
+import chroma from 'chroma-js'
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
@@ -221,6 +222,8 @@ class MelodicEmitter {
       toneAttackEvent(eventConfig, time, emitter);
       p5AttackEvent(eventConfig, emitter);
 
+      // console.log('attack', eventConfig.pitch, chroma(emitter.color.current).hsv())
+ 
       if (emitter.hueIntegration) {
         hueAttackEvent(eventConfig, emitter);
       }
@@ -247,7 +250,7 @@ class MelodicEmitter {
 
     function p5AttackEvent(eventConfig, emitter) {
       emitter.color.changing = true;
-      emitter.color.start = emitter.color.current;
+      emitter.color.start = chroma(emitter.color.current).hex();
       emitter.color.end = associateNoteAndColor(eventConfig.pitch).webColor;
       emitter.color.iteratorStep = 1 / (eventConfig.attack * 30);
     }
@@ -276,6 +279,8 @@ class MelodicEmitter {
       let emitter = this;
       toneReleaseEvent(emitter);
       p5ReleaseEvent(eventConfig, emitter);
+
+      // console.log('release', eventConfig.pitch, emitter.color.end.h, emitter.color.end.s, emitter.color.end.v)
 
       if (emitter.hueIntegration) {
         hueReleaseEvent(eventConfig, emitter);

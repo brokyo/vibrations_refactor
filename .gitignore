@@ -1,7 +1,8 @@
 .DS_Store
 /client/node_modules
 /client/dist
-/server/assets
+/server/assets/creds.json
+/server/assets/array.json
 /server/node_modules
 
 # local env files

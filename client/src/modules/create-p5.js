@@ -77,6 +77,11 @@ const s = sketch => {
       sketch.windowWidth / 2,
       sketch.windowHeight - 40
     );
+    // sketch.text(
+    //   `${sketch.waveMeta.melodicToneEmitters}`,
+    //   sketch.windowWidth / 2,
+    //   sketch.windowHeight - 40
+    // )
   };
 
   sketch.windowResized = () => {
