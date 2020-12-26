@@ -142,7 +142,7 @@ class MelodicEmitter {
   updateKey(key) {
     this.key = key;
     let tonicColor = associateNoteAndColor(key.tonic).webColor;
-    this.tonicColor = { h: tonicColor.h, s: tonicColor.s, v: 0.15 };
+    this.tonicColor = { h: tonicColor.h, s: tonicColor.s, v: 0.25 };
     this.changeFormant(key.formant.filters);
   }
 
@@ -219,8 +219,6 @@ class MelodicEmitter {
     function hueAttackEvent(evenConfig, emitter) {
       let pitchColor = associateNoteAndColor(eventConfig.pitch).hueColor;
 
-      console.log(emitter);
-
       let hueConfig = {
         id: emitter.id,
         h: pitchColor.h,
@@ -283,13 +281,36 @@ class MelodicEmitter {
     }
   }
 
+  defaultColors(baseRelease) {
+    baseRelease = baseRelease / 1000;
+    let emitter = this;
+    p5CompletedEvent(emitter, baseRelease);
+    hueCompletedEvent(emitter, baseRelease);
+
+    function p5CompletedEvent(emitter, baseRelease) {
+      emitter.color.changing = true;
+      emitter.color.start = emitter.color.current;
+      emitter.color.end = `#000000`;
+      emitter.color.iteratorStep = 1 / (baseRelease * 30);;
+    }
+
+    function hueCompletedEvent(emitter) {
+      let hueConfig = {
+        id: emitter.id,
+        duration: baseRelease
+      };
+
+      fetch(baseUrl + `hue/completed`, {
+        method: "POST",
+        headers: { "Content-Type": `application/json` },
+        body: JSON.stringify(hueConfig)
+      });   
+    }
+  }
+
   createCompletedEvent(startShift) {
     let completedEvent = new Tone.Event(time => {
       this.active = false;
-      this.color.changing = true;
-      this.color.start = this.color.current;
-      this.color.end = `#000000`;
-      this.color.iteratorStep = 1 / 60;
     });
     completedEvent.time = 0;
     completedEvent.section = `melodic`;

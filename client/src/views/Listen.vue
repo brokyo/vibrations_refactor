@@ -308,16 +308,22 @@ export default {
     },
     async startWave() {
       Tone.Master.mute = false;
-      await this.sleep(5000);
       this.waveMeta.activeCard = `performance`;
       Tone.Transport.start();
+      // TODO: maybe begin by warming up to tonic color
     },
     async endWave() {
-      // TODO: This should be the length of the final release
-      await this.sleep(7500);
+      let baseReleaseTime = 6000;
+      let echoEstimate = 9000;
+      let titleCardTime = 8000;
+
       this.toneMeta.baseToneEmitter.synth.releaseAll();
-      await this.sleep(7500);
+      this.toneMeta.melodicToneEmitters.forEach(emitter => {
+        emitter.defaultColors(baseReleaseTime);
+      })
+      await this.sleep(baseReleaseTime + echoEstimate);
       this.generateWave();
+      await this.sleep(titleCardTime)
       this.startWave();
     }
   }

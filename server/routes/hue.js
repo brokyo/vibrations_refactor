@@ -179,10 +179,8 @@ router.post('/release', function(req, res, next) {
 
 	// TODO: P5 uses `value` and Hue uses `brightness` this is a hack to change acceptable color range
 	if(config.v < 1) {
-		config.v = 5;
+		config.v = 10;
 	}
-
-	console.log(config);
 
 	getCreds().then(creds => {
 		createApi(creds).then(api => {
@@ -195,6 +193,25 @@ router.post('/release', function(req, res, next) {
 		})
 	})
 })
+
+router.post('/completed', function(req, res, next) {
+	var config = req.body
+
+	getCreds().then(creds => {
+		createApi(creds).then(api => {
+			// Purely aesthetic choice. Timing 'feels' better
+			config.duration = config.duration / 1.5;
+
+			let newState = new LightStateBase()
+
+			newState.on().brightness(1).transition(config.duration * 1000).off();
+			newState.off();
+			api.lights.setLightState(config.id, newState)
+			res.sendStatus(200)
+		})
+	})
+})
+
 
 router.get('/get_array', function(res, res, next) {
 	getArray().then(array => {
