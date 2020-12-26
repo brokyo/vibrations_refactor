@@ -227,11 +227,12 @@ export default {
         return module;
       });
 
-      this.$_.times(this.hueMeta.lightArray.length, () => {
+      this.hueMeta.lightArray.forEach(lightConfig => {
+        let hueBulbId = lightConfig.id == undefined ? 0 : lightConfig.id;
         this.toneMeta.melodicToneEmitters.push(
-          melodicEmitterGenerator.createMelodicEmitter()
+          melodicEmitterGenerator.createMelodicEmitter(hueBulbId)
         );
-      });
+      })
 
       let baseEmitterGenerator = await import(
         `@/instruments/base-emitter.js`

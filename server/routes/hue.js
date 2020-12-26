@@ -14,7 +14,6 @@ function getCreds() {
             if(err) {
                 reject(err);
             } else {
-				console.log('creds')
                 let creds = JSON.parse(data);
                 resolve(creds);
             }
@@ -100,7 +99,6 @@ router.get('/credential_check', function(res, res, next) {
 	getCreds().then(data => {
         res.status(200).send({userExists: true})
 	}, err => {
-		console.log(2)
         res.status(200).send({userExists: false})
 	})
 })
@@ -160,13 +158,14 @@ router.get('/reset_lights', function(req, res, next) {
 
 router.post('/attack', function(req, res, next) {
 	var colorConfig = req.body
+	console.log(colorConfig)
 	getCreds().then(creds => {
 		createApi(creds).then(api => {
 			let newState = new LightStateBase()
 
 			newState.on().hue(colorConfig.h * 182.0416).brightness(colorConfig.b).saturation(colorConfig.s).transition(colorConfig.duration * 1000)
 
-			api.lights.setLightState(colorConfig.lightId, newState)
+			api.lights.setLightState(colorConfig.id, newState)
 			res.sendStatus(200)
 		})
 	})
@@ -188,14 +187,12 @@ router.post('/release', function(req, res, next) {
 
 router.get('/get_array', function(res, res, next) {
 	getArray().then(array => {
-		console.log(array)
 		if ( array.length === 0 ) {
 			res.send({'hueActive': false, 'array': array})
 		} else {
 			res.send({'hueActive': true, 'array': array})
 		}
 	}, err => {
-		console.log(err)
 		res.send({'hueActive': false, 'array': []})		
 	})
 })

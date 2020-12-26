@@ -2,6 +2,7 @@ import * as Tone from "tone";
 import _ from "lodash";
 import { waveConfig, eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "@/utilities/color-map.js";
+const baseUrl = `http://localhost:3000/`;
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
@@ -31,12 +32,12 @@ const melodicEmitterDefaults = {
 };
 
 class MelodicEmitter {
-  constructor(userConfig) {
-    let config = userConfig == undefined ? melodicEmitterDefaults : userConfig;
+  constructor(id) {
+    let config = melodicEmitterDefaults;
     ///////////////
     // UNIVERSAL //
     ///////////////
-    this.id = null;
+    this.id = id;
     this.active = null;
     this.key = {};
 
@@ -182,6 +183,7 @@ class MelodicEmitter {
       let emitter = this;
       toneAttackEvent(eventConfig, time, emitter);
       p5AttackEvent(eventConfig, emitter);
+      hueAttackEvent(eventConfig, emitter);
     });
     attackEvent.type = `attack`;
     attackEvent.time = 0;
@@ -208,6 +210,24 @@ class MelodicEmitter {
       emitter.color.start = emitter.color.current;
       emitter.color.end = associateNoteAndColor(eventConfig.pitch).webColor;
       emitter.color.iteratorStep = 1 / (eventConfig.attack * 30);
+    }
+
+    function hueAttackEvent(evenConfig, emitter) {
+      let pitchColor = associateNoteAndColor(eventConfig.pitch).hueColor;
+
+      let hueConfig = {
+        id: emitter.id,
+        h: pitchColor.h,
+        s: pitchColor.s,
+        b: pitchColor.v,
+        duration: eventConfig.attack
+      };
+
+      fetch(baseUrl + 'hue/attack', {
+        method: `POST`,
+        headers: { "Content-Type": `application/json` },
+        body: JSON.stringify(hueConfig)
+      });
     }
   }
 
