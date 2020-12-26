@@ -60,8 +60,7 @@ const groups = [
       {
         type: `short`,
         text: `You will know what happens when you let go.`
-      },
-      {}
+      }
     ]
   },
   {
