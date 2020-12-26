@@ -290,6 +290,7 @@ export default {
     },
     async generateWave() {
       await this.generateUtterance();
+      this.waveMeta.activeCard = `title`;
 
       this.waveMeta.key = await import(`@/config/key-config.js`).then(
         module => {
@@ -304,13 +305,12 @@ export default {
         emitter.updateKey(this.waveMeta.key);
         emitter.scheduleEvents(this.toneMeta.timeline);
       });
-      this.waveMeta.activeCard = `title`;
     },
     async startWave() {
+      let timeline = this.toneMeta.timeline
       Tone.Master.mute = false;
-      this.waveMeta.activeCard = `performance`;
       Tone.Transport.start();
-      // TODO: maybe begin by warming up to tonic color
+      this.waveMeta.activeCard = `performance`;
     },
     async endWave() {
       let baseReleaseTime = 6000;
@@ -322,6 +322,7 @@ export default {
         emitter.defaultColors(baseReleaseTime);
       })
       await this.sleep(baseReleaseTime + echoEstimate);
+      Tone.Transport.stop();
       this.generateWave();
       await this.sleep(titleCardTime)
       this.startWave();

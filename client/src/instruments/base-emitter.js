@@ -4,7 +4,7 @@ const baseEmitterDefaults = {
   synth: {
     oscillator: {},
     envelope: {
-      attack: 2.0,
+      attack: 1.0,
       attackCurve: `linear`,
       decay: 0.1,
       release: 8,
@@ -118,14 +118,19 @@ class BaseEmitter {
   }
 
   scheduleEvents(timeline) {
+    let emitter = this;
     let schedule = [];
 
+    function toneStart() {
+      emitter.synth.triggerAttack(emitter.key.tonic, `+0.5`);
+    }
+
     let startEvent = new Tone.Event(time => {
-      this.synth.triggerAttack(this.key.tonic, `+0.25`);
+      toneStart();
     });
     startEvent.type = `base start`;
     startEvent.time = 0;
-    startEvent.note = this.key.tonic;
+    startEvent.note = emitter.key.tonic;
     startEvent.section = `base`;
     startEvent.start(Tone.Time().now());
 

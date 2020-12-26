@@ -179,6 +179,44 @@ class MelodicEmitter {
     return eventConfig;
   }
 
+  // TODO: Don't use yet. It doesn't look right.
+  waveStart(timeline) {
+    let emitter = this;
+    var startEvent = new Tone.Event(time => {
+      p5StartEvent(emitter)
+      hueStartEvent(emitter)
+    })
+    startEvent.type = 'start'
+    startEvent.time = 0;
+    startEvent.start(Tone.Time().now())
+    timeline.add(startEvent)
+
+    function p5StartEvent(emitter) {
+      emitter.color.changing = true;
+      emitter.color.start = emitter.color.current;
+      emitter.color.end = emitter.tonicColor;
+      emitter.color.iteratorStep = 1 / (1 * 30);
+    }
+
+    function hueStartEvent(emitter) {
+      let hueConfig = {
+        id: emitter.id,
+        h: emitter.tonicColor.h,
+        s: emitter.tonicColor.s,
+        b: emitter.tonicColor.v,
+        duration: 1
+      };
+
+      fetch(baseUrl + `hue/attack`, {
+        method: `POST`,
+        headers: { "Content-Type": `application/json` },
+        body: JSON.stringify(hueConfig)
+      });
+    }
+
+
+  }
+
   createAttackEvent(eventConfig, startShift) {
     var attackEvent = new Tone.Event(time => {
       let emitter = this;
