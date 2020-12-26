@@ -14,6 +14,7 @@ function getCreds() {
             if(err) {
                 reject(err);
             } else {
+				console.log('creds')
                 let creds = JSON.parse(data);
                 resolve(creds);
             }
@@ -35,11 +36,11 @@ function createApi(creds) {
 
 function getArray() {
     return new Promise((resolve, reject) => {
-        fs.readFile('../assets/creds.json', (err, data) => {
+        fs.readFile('assets/array.json', (err, data) => {
             if (err) {
                 reject(err)
             } else {
-                resolve(JSON.parse(data).performanceArracy);
+                resolve(JSON.parse(data).performanceArray);
             }
         });
     });
@@ -75,11 +76,8 @@ router.get('/setup', function(req, res, next) {
 				key: createdUser.clientkey
 			}
 
-			console.log(creds)
-
-			fs.writeFile(savePath + 'creds.json', JSON.stringify(creds), (err) => {
+			fs.writeFile('assets/creds.json', JSON.stringify(creds), (err) => {
 				if (err) {
-					console.log(err)
 					res.status(400).send({'type': 'error', 'message': err})
 				} else {
 					res.status(200).send({'type': 'success'})
@@ -102,6 +100,7 @@ router.get('/credential_check', function(res, res, next) {
 	getCreds().then(data => {
         res.status(200).send({userExists: true})
 	}, err => {
+		console.log(2)
         res.status(200).send({userExists: false})
 	})
 })
@@ -133,7 +132,7 @@ router.post('/test_light', function(req, res, next) {
 router.post('/save_array', function(req, res, next) {
 	var saveData = '{"performanceArray": ' + JSON.stringify(req.body.array) + '}'
 
-	fs.writeFile(savePath + 'array.json', saveData, (err) => {
+	fs.writeFile('assets/array.json', saveData, (err) => {
 		if (err) {
 			res.status(400).send(err)
 		} else {
@@ -189,12 +188,14 @@ router.post('/release', function(req, res, next) {
 
 router.get('/get_array', function(res, res, next) {
 	getArray().then(array => {
+		console.log(array)
 		if ( array.length === 0 ) {
 			res.send({'hueActive': false, 'array': array})
 		} else {
 			res.send({'hueActive': true, 'array': array})
 		}
 	}, err => {
+		console.log(err)
 		res.send({'hueActive': false, 'array': []})		
 	})
 })

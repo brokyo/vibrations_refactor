@@ -55,6 +55,7 @@ export default {
       hueMeta: {
         initialized: false,
         configured: false,
+        integrated: false,
         lightArray: []
       },
       toneMeta: {
@@ -146,10 +147,7 @@ export default {
       return true;
     },
     async initHue() {
-      this.hueMeta.integration = false;
-      this.hueMeta.lightArray = [{}, {}, {}, {}];
       this.hueMeta.initialized = true;
-
       return true;
     },
     async initTone() {
@@ -201,8 +199,17 @@ export default {
     },
     async configureHue() {
       // Hue logic here
-      let hueVals = false;
-      return hueVals;
+      fetch(`http://localhost:3000/hue/get_array`)
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          this.hueMeta.integrated = data.hueActive;
+          this.hueMeta.lightArray = data.lightArray
+          console.log(data)
+
+          return true;
+        });
     },
     async configureTone() {
       // Get configured instruments
