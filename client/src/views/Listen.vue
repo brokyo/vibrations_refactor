@@ -96,11 +96,18 @@ export default {
       }
     }
   },
-  beforeCreate() {
+  created() {
     // TODO: Is there a way to check for hue integration on page load
-    fetch(`http://localhost:3000/hue/reset_lights`, {
-      method: 'POST'
-    });
+    fetch(`http://localhost:3000/hue/reset_lights`, { method: `POST` })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          return Promise.reject(`some other error: ` + response.status);
+        }
+      })
+      .then(data => (this.hueMeta.integrated = true))
+      .catch(error => (this.hueMeta.integrated = false));
   },
   methods: {
     //USER ACTIONS
@@ -153,26 +160,6 @@ export default {
       return true;
     },
     async initHue() {
-      fetch(`http://localhost:3000/hue/get_array`)
-        .then(response => {
-          return response.json();
-        })
-        .then(data => {
-          this.hueMeta.integrated = data.hueActive;
-
-          if (this.hueMeta.integrated === true) {
-            this.hueMeta.lightArray = data.array;
-          } else {
-            this.hueMeta.lightArray = noHueDefaults();
-          }
-
-          return true;
-        })
-        .catch(err => {
-          this.hueMeta.integrated = false;
-          this.hueMeta.lightArray = noHueDefaults();
-        });
-
       function noHueDefaults() {
         let defaultLights = [];
         let defaultLight = { id: 0, active: false };
@@ -183,6 +170,34 @@ export default {
 
         return defaultLights;
       }
+
+      if (this.hueMeta.integrated) {
+        fetch(`http://localhost:3000/hue/get_array`)
+          .then(response => {
+            return response.json();
+          })
+          .then(data => {
+            this.hueMeta.integrated = data.hueActive;
+
+            if (this.hueMeta.integrated === true) {
+              this.hueMeta.lightArray = data.array;
+            } else {
+              this.hueMeta.lightArray = noHueDefaults();
+            }
+
+            return true;
+          })
+          .catch(err => {
+            this.hueMeta.integrated = false;
+            this.hueMeta.lightArray = noHueDefaults();
+          });
+      } else {
+        this.hueMeta.integrated = false;
+        this.hueMeta.lightArray = noHueDefaults();
+
+        return true
+      }
+
     },
     async initTone() {
       Tone = await import(`tone`).then(module => {
@@ -298,6 +313,8 @@ export default {
         }
       );
 
+      console.log(this.waveMeta.key.name, this.waveMeta.key.tonic);
+
       this.toneMeta.baseToneEmitter.updateKey(this.waveMeta.key);
       this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
 
@@ -307,7 +324,7 @@ export default {
       });
     },
     async startWave() {
-      let timeline = this.toneMeta.timeline
+      let timeline = this.toneMeta.timeline;
       Tone.Master.mute = false;
       Tone.Transport.start();
       this.waveMeta.activeCard = `performance`;
@@ -320,11 +337,11 @@ export default {
       this.toneMeta.baseToneEmitter.synth.releaseAll();
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
         emitter.defaultColors(baseReleaseTime);
-      })
+      });
       await this.sleep(baseReleaseTime + echoEstimate);
       Tone.Transport.stop();
       this.generateWave();
-      await this.sleep(titleCardTime)
+      await this.sleep(titleCardTime);
       this.startWave();
     }
   }

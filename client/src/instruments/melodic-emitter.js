@@ -183,13 +183,13 @@ class MelodicEmitter {
   waveStart(timeline) {
     let emitter = this;
     var startEvent = new Tone.Event(time => {
-      p5StartEvent(emitter)
-      hueStartEvent(emitter)
-    })
-    startEvent.type = 'start'
+      p5StartEvent(emitter);
+      hueStartEvent(emitter);
+    });
+    startEvent.type = `start`;
     startEvent.time = 0;
-    startEvent.start(Tone.Time().now())
-    timeline.add(startEvent)
+    startEvent.start(Tone.Time().now());
+    timeline.add(startEvent);
 
     function p5StartEvent(emitter) {
       emitter.color.changing = true;
@@ -213,8 +213,6 @@ class MelodicEmitter {
         body: JSON.stringify(hueConfig)
       });
     }
-
-
   }
 
   createAttackEvent(eventConfig, startShift) {
@@ -323,13 +321,16 @@ class MelodicEmitter {
     baseRelease = baseRelease / 1000;
     let emitter = this;
     p5CompletedEvent(emitter, baseRelease);
-    hueCompletedEvent(emitter, baseRelease);
+
+    if (emitter.hueIntegration) {
+      hueCompletedEvent(emitter, baseRelease);
+    }
 
     function p5CompletedEvent(emitter, baseRelease) {
       emitter.color.changing = true;
       emitter.color.start = emitter.color.current;
       emitter.color.end = `#000000`;
-      emitter.color.iteratorStep = 1 / (baseRelease * 30);;
+      emitter.color.iteratorStep = 1 / (baseRelease * 30);
     }
 
     function hueCompletedEvent(emitter) {
@@ -339,10 +340,10 @@ class MelodicEmitter {
       };
 
       fetch(baseUrl + `hue/completed`, {
-        method: "POST",
+        method: `POST`,
         headers: { "Content-Type": `application/json` },
         body: JSON.stringify(hueConfig)
-      });   
+      });
     }
   }
 

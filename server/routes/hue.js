@@ -154,7 +154,7 @@ router.post('/reset_lights', function(req, res, next) {
 				array.forEach(light => {
 					api.lights.setLightState(light.id, newState)
 				})
-				res.sendStatus(200)
+				res.send({integrated: true})
 			})
 		})
 	})
