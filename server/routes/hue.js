@@ -128,6 +128,10 @@ router.post('/test_light', function(req, res, next) {
 })
 
 router.post('/save_array', function(req, res, next) {
+	req.body.array.forEach(light => {
+		light.integrated = true
+	})
+
 	var saveData = '{"performanceArray": ' + JSON.stringify(req.body.array) + '}'
 
 	fs.writeFile('assets/array.json', saveData, (err) => {
@@ -140,7 +144,7 @@ router.post('/save_array', function(req, res, next) {
 })
 
 // Playback
-router.get('/reset_lights', function(req, res, next) {
+router.post('/reset_lights', function(req, res, next) {
 	getCreds().then(creds => {
 		createApi(creds).then(api => {
 			getArray().then(array => {
@@ -175,7 +179,7 @@ router.post('/release', function(req, res, next) {
 
 	// TODO: P5 uses `value` and Hue uses `brightness` this is a hack to change acceptable color range
 	if(config.v < 1) {
-		config.v = 15;
+		config.v = 5;
 	}
 
 	console.log(config);

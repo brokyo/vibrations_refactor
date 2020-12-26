@@ -96,9 +96,11 @@ export default {
       }
     }
   },
-  mounted() {
-    // TODO: This should have some kind of check or at least fail gracefully?
-    fetch('http://localhost:3000/hue/reset_lights');
+  beforeCreate() {
+    // TODO: Is there a way to check for hue integration on page load
+    fetch(`http://localhost:3000/hue/reset_lights`, {
+      method: 'POST'
+    });
   },
   methods: {
     //USER ACTIONS
@@ -161,16 +163,26 @@ export default {
           if (this.hueMeta.integrated === true) {
             this.hueMeta.lightArray = data.array;
           } else {
-            this.hueMeta.lightArray = [{}, {}, {}, {}];
+            this.hueMeta.lightArray = noHueDefaults();
           }
 
           return true;
         })
         .catch(err => {
           this.hueMeta.integrated = false;
-          this.hueMeta.lightArray = [{}, {}, {}, {}];
-          return true;
+          this.hueMeta.lightArray = noHueDefaults();
         });
+
+      function noHueDefaults() {
+        let defaultLights = [];
+        let defaultLight = { id: 0, active: false };
+
+        for (let i = 0; i < 4; i++) {
+          defaultLights.push(defaultLight);
+        }
+
+        return defaultLights;
+      }
     },
     async initTone() {
       Tone = await import(`tone`).then(module => {
@@ -206,6 +218,7 @@ export default {
         iteratorStep: 0
       };
 
+      // TODO: Change to .forEach
       this.$_.times(this.hueMeta.lightArray.length, () => {
         this.p5Meta.activeColorArray.push(defaultColorObject);
       });
@@ -232,11 +245,10 @@ export default {
       });
 
       this.hueMeta.lightArray.forEach(lightConfig => {
-        let hueBulbId = lightConfig.id == undefined ? 0 : lightConfig.id;
         this.toneMeta.melodicToneEmitters.push(
-          melodicEmitterGenerator.createMelodicEmitter(hueBulbId)
+          melodicEmitterGenerator.createMelodicEmitter(lightConfig)
         );
-      })
+      });
 
       let baseEmitterGenerator = await import(
         `@/instruments/base-emitter.js`

@@ -32,12 +32,13 @@ const melodicEmitterDefaults = {
 };
 
 class MelodicEmitter {
-  constructor(id) {
+  constructor(hueConfig) {
     let config = melodicEmitterDefaults;
     ///////////////
     // UNIVERSAL //
     ///////////////
-    this.id = id;
+    this.id = hueConfig.id;
+    this.hueIntegration = hueConfig.integrated;
     this.active = null;
     this.key = {};
 
@@ -183,7 +184,10 @@ class MelodicEmitter {
       let emitter = this;
       toneAttackEvent(eventConfig, time, emitter);
       p5AttackEvent(eventConfig, emitter);
-      hueAttackEvent(eventConfig, emitter);
+
+      if (emitter.hueIntegration) {
+        hueAttackEvent(eventConfig, emitter);
+      }
     });
     attackEvent.type = `attack`;
     attackEvent.time = 0;
@@ -215,6 +219,8 @@ class MelodicEmitter {
     function hueAttackEvent(evenConfig, emitter) {
       let pitchColor = associateNoteAndColor(eventConfig.pitch).hueColor;
 
+      console.log(emitter);
+
       let hueConfig = {
         id: emitter.id,
         h: pitchColor.h,
@@ -223,7 +229,7 @@ class MelodicEmitter {
         duration: eventConfig.attack
       };
 
-      fetch(baseUrl + 'hue/attack', {
+      fetch(baseUrl + `hue/attack`, {
         method: `POST`,
         headers: { "Content-Type": `application/json` },
         body: JSON.stringify(hueConfig)
@@ -236,7 +242,10 @@ class MelodicEmitter {
       let emitter = this;
       toneReleaseEvent(emitter);
       p5ReleaseEvent(eventConfig, emitter);
-      hueReleaseEvent(eventConfig, emitter);
+
+      if (emitter.hueIntegration) {
+        hueReleaseEvent(eventConfig, emitter);
+      }
     });
     releaseEvent.time = 0;
     releaseEvent.type = `release`;
@@ -266,7 +275,7 @@ class MelodicEmitter {
         duration: eventConfig.release
       };
 
-      fetch(baseUrl + 'hue/release', {
+      fetch(baseUrl + `hue/release`, {
         method: `POST`,
         headers: { "Content-Type": `application/json` },
         body: JSON.stringify(hueConfig)
