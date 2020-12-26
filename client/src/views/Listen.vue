@@ -96,6 +96,10 @@ export default {
       }
     }
   },
+  mounted() {
+    // TODO: This should have some kind of check or at least fail gracefully?
+    fetch('http://localhost:3000/hue/reset_lights');
+  },
   methods: {
     //USER ACTIONS
     async enterSpace() {

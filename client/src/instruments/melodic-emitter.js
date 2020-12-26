@@ -236,6 +236,7 @@ class MelodicEmitter {
       let emitter = this;
       toneReleaseEvent(emitter);
       p5ReleaseEvent(eventConfig, emitter);
+      hueReleaseEvent(eventConfig, emitter);
     });
     releaseEvent.time = 0;
     releaseEvent.type = `release`;
@@ -254,6 +255,22 @@ class MelodicEmitter {
       emitter.color.start = emitter.color.current;
       emitter.color.end = emitter.tonicColor;
       emitter.color.iteratorStep = 1 / (eventConfig.release * 30);
+    }
+
+    function hueReleaseEvent(eventConfig, emitter) {
+      let hueConfig = {
+        id: emitter.id,
+        h: emitter.tonicColor.h,
+        s: emitter.tonicColor.s,
+        v: emitter.tonicColor.v,
+        duration: eventConfig.release
+      };
+
+      fetch(baseUrl + 'hue/release', {
+        method: `POST`,
+        headers: { "Content-Type": `application/json` },
+        body: JSON.stringify(hueConfig)
+      });
     }
   }
 
@@ -291,7 +308,6 @@ class MelodicEmitter {
     let completedEvent = this.createCompletedEvent(startShift);
     waveEventsArray.push(completedEvent);
 
-    console.table(waveEventsArray);
     return waveEventsArray;
   }
 

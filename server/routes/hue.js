@@ -158,7 +158,6 @@ router.get('/reset_lights', function(req, res, next) {
 
 router.post('/attack', function(req, res, next) {
 	var colorConfig = req.body
-	console.log(colorConfig)
 	getCreds().then(creds => {
 		createApi(creds).then(api => {
 			let newState = new LightStateBase()
@@ -173,13 +172,21 @@ router.post('/attack', function(req, res, next) {
 
 router.post('/release', function(req, res, next) {
 	var config = req.body
+
+	// TODO: P5 uses `value` and Hue uses `brightness` this is a hack to change acceptable color range
+	if(config.v < 1) {
+		config.v = 15;
+	}
+
+	console.log(config);
+
 	getCreds().then(creds => {
 		createApi(creds).then(api => {
 			let newState = new LightStateBase()
 
 			newState.on().hue(config.h * 182.0416).saturation(config.s).brightness(config.v).transition(config.duration * 1000)
 
-			api.lights.setLightState(config.lightId, newState)
+			api.lights.setLightState(config.id, newState)
 			res.sendStatus(200)
 		})
 	})
