@@ -147,8 +147,26 @@ export default {
       return true;
     },
     async initHue() {
-      this.hueMeta.initialized = true;
-      return true;
+      fetch(`http://localhost:3000/hue/get_array`)
+        .then(response => {
+          return response.json();
+        })
+        .then(data => {
+          this.hueMeta.integrated = data.hueActive;
+
+          if (this.hueMeta.integrated === true) {
+            this.hueMeta.lightArray = data.array;
+          } else {
+            this.hueMeta.lightArray = [{}, {}, {}, {}];
+          }
+
+          return true;
+        })
+        .catch(err => {
+          this.hueMeta.integrated = false;
+          this.hueMeta.lightArray = [{}, {}, {}, {}];
+          return true;
+        });
     },
     async initTone() {
       Tone = await import(`tone`).then(module => {
@@ -199,17 +217,7 @@ export default {
     },
     async configureHue() {
       // Hue logic here
-      fetch(`http://localhost:3000/hue/get_array`)
-        .then(response => {
-          return response.json();
-        })
-        .then(data => {
-          this.hueMeta.integrated = data.hueActive;
-          this.hueMeta.lightArray = data.lightArray
-          console.log(data)
-
-          return true;
-        });
+      return true;
     },
     async configureTone() {
       // Get configured instruments

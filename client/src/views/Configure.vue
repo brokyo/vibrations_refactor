@@ -120,7 +120,7 @@ export default {
           return response.json();
         })
         .then(json => {
-          console.log(json)
+          console.log(json);
           this.lightArray = [];
 
           json.lightArray.forEach(light => {
