@@ -50,7 +50,7 @@ export default {
         initialized: false,
         configured: false,
         color: null,
-        activeColorArray: []
+        canvas: {}
       },
       hueMeta: {
         initialized: false,
@@ -124,7 +124,7 @@ export default {
       await this.startWave();
     },
     saveImage() {
-      p5.saveCanvas(`#defaultCanvas0`, `please_remember`, `png`);
+      this.p5Meta.canvas.screenshot();
     },
     toggleFullScreen() {
       if (!document.fullscreenElement) {
@@ -195,9 +195,8 @@ export default {
         this.hueMeta.integrated = false;
         this.hueMeta.lightArray = noHueDefaults();
 
-        return true
+        return true;
       }
-
     },
     async initTone() {
       Tone = await import(`tone`).then(module => {
@@ -222,28 +221,18 @@ export default {
       ]);
     },
     async configureP5() {
-      let vibrationCanvas = await import(`@/modules/create-p5`).then(module => {
-        return new p5(module.s);
-      });
+      let vibrationsCanvas = await import(`@/modules/create-p5`).then(
+        module => {
+          return new p5(module.s);
+        }
+      );
 
-      let defaultColorObject = {
-        changing: false,
-        start: `#000000`,
-        end: `#000000`,
-        iteratorStep: 0
-      };
-
-      // TODO: Change to .forEach
-      this.$_.times(this.hueMeta.lightArray.length, () => {
-        this.p5Meta.activeColorArray.push(defaultColorObject);
-      });
+      this.p5Meta.canvas.screenshot = vibrationsCanvas.screenshot;
 
       // Connect p5 sketch to relevant parts of reactive data object
       // TODO: This is a hack... is there a cleaner way?
-      vibrationCanvas.activeColorArray = this.p5Meta.activeColorArray;
-      vibrationCanvas.baseToneEmitter = this.baseToneEmitter;
-      vibrationCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
-      vibrationCanvas.waveMeta = this.waveMeta;
+      vibrationsCanvas.melodicToneEmitters = this.toneMeta.melodicToneEmitters;
+      vibrationsCanvas.waveMeta = this.waveMeta;
 
       return true;
     },
@@ -416,19 +405,19 @@ body {
   }
 }
 
-// #screenshot-button {
-//   position: fixed;
-//   top: 6px;
-//   right: 40px;
-//   height: 40px;
-//   width: 40px;
-//   z-index: 1;
-//   opacity: 0.3;
-// }
+#screenshot-button {
+  position: fixed;
+  top: 6px;
+  right: 40px;
+  height: 40px;
+  width: 40px;
+  z-index: 1;
+  opacity: 0.3;
+}
 
-// #screenshot-button:hover {
-//   opacity: 1;
-// }
+#screenshot-button:hover {
+  opacity: 1;
+}
 
 #start-button {
   width: 300px;

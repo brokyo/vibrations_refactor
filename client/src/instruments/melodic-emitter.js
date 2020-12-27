@@ -3,7 +3,7 @@ import _ from "lodash";
 import { waveConfig, eventRanges } from "@/config/wave-config.js";
 import { associateNoteAndColor } from "@/utilities/color-map.js";
 const baseUrl = `http://localhost:3000/`;
-import chroma from 'chroma-js'
+import chroma from "chroma-js";
 
 // `ChorirSection`s are objects that contain the individual Tone voices, and
 // the color metadata for p5 and Hue.
@@ -223,7 +223,7 @@ class MelodicEmitter {
       p5AttackEvent(eventConfig, emitter);
 
       // console.log('attack', eventConfig.pitch, chroma(emitter.color.current).hsv())
- 
+
       if (emitter.hueIntegration) {
         hueAttackEvent(eventConfig, emitter);
       }

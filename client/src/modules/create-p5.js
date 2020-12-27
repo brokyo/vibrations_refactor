@@ -87,6 +87,10 @@ const s = sketch => {
   sketch.windowResized = () => {
     sketch.resizeCanvas(sketch.windowWidth, sketch.windowHeight);
   };
+
+  sketch.screenshot = () => {
+    sketch.saveCanvas(`please_remember`, `png`);
+  };
 };
 
 export { s };
