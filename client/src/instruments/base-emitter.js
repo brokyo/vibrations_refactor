@@ -1,8 +1,7 @@
 import * as Tone from "tone";
-
 const baseEmitterDefaults = {
   synth: {
-    oscillator: {},
+    maxPolyphony: 10,
     envelope: {
       attack: 1.0,
       attackCurve: `linear`,
@@ -76,7 +75,7 @@ class BaseEmitter {
       hue: { h: 0, s: 0, v: 0 }
     };
     this.key = {};
-    this.synth = new Tone.PolySynth(10, Tone.AMSynth);
+    this.synth = new Tone.PolySynth(Tone.AMSynth);
     this.synth.set(config.synth);
     this.tremolo = new Tone.Tremolo(config.tremolo);
     this.vibrato = new Tone.Vibrato(config.vibrato);
@@ -104,41 +103,30 @@ class BaseEmitter {
   updateKey(key) {
     this.key = key;
 
+    let partials;
     if (key.type == `major`) {
       let partials = [];
-      this.synth.voices.forEach(voice => {
-        voice.set({ type: partials });
-      });
     } else if (key.type == `minor`) {
       let partials = [0.615, 0.29, 0.155, 0.03, 0.065, 0.83, 0, 0, 0];
-      this.synth.voices.forEach(voice => {
-        voice.set({ partials: partials });
-      });
+      this.synth.set({ type: partials });
     }
+    this.synth.set({ type: partials });
   }
 
-  scheduleEvents(timeline) {
+  scheduleEvents() {
     let emitter = this;
-    let schedule = [];
 
     function toneStart() {
       emitter.synth.triggerAttack(emitter.key.tonic, `+0.5`);
     }
 
-    let startEvent = new Tone.Event(time => {
+    let startEvent = new Tone.ToneEvent(_time => {
       toneStart();
     });
     startEvent.type = `base start`;
-    startEvent.time = 0;
     startEvent.note = emitter.key.tonic;
     startEvent.section = `base`;
-    startEvent.start(Tone.Time().now());
-
-    schedule.push(startEvent);
-
-    schedule.forEach(event => {
-      timeline.add(event);
-    });
+    startEvent.start(Tone.now());
   }
 }
 

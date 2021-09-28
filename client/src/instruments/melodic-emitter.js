@@ -28,7 +28,7 @@ const melodicEmitterDefaults = {
     gain: 0.2
   },
   lineOut: {
-    gain: 0.4
+    volume: -30
   }
 };
 
@@ -81,9 +81,7 @@ class MelodicEmitter {
       });
     });
 
-    this.voice.oscs.forEach((osc, index) =>
-      osc.connect(this.voice.envs[index])
-    );
+    this.voice.oscs.forEach((osc, index) => osc.connect(this.voice.envs[index]));
     this.voice.envs.forEach(env => env.connect(this.voice.voxOut));
 
     // -- WHITE NOISE -- //
@@ -117,7 +115,7 @@ class MelodicEmitter {
 
     // // connect each lfo node to its corresonding formant to oscillate filter frequency
     this.voice.lfoNodes.forEach((lfoNode, index) => {
-      lfoNode.connect(this.voice.formantNodes[index].frequency);
+      // lfoNode.connect(this.voice.formantNodes[index].frequency);
     });
 
     this.voice.volumeNodes = _.times(5, function() {
@@ -135,7 +133,7 @@ class MelodicEmitter {
 
     // -- EFFECTS -- //
     this.voice.position = new Tone.Panner(0);
-    this.voice.lineOut = new Tone.Gain(config.lineOut.gain);
+    this.voice.lineOut = new Tone.Volume(config.lineOut.gain);
 
     this.voice.formantOut.chain(this.voice.position, this.voice.lineOut);
   }
@@ -183,13 +181,13 @@ class MelodicEmitter {
   // TODO: Don't use yet. It doesn't look right.
   waveStart(timeline) {
     let emitter = this;
-    var startEvent = new Tone.Event(time => {
+    var startEvent = new Tone.ToneEvent(time => {
       p5StartEvent(emitter);
       hueStartEvent(emitter);
     });
     startEvent.type = `start`;
     startEvent.time = 0;
-    startEvent.start(Tone.Time().now());
+    startEvent.start(Tone.now());
     timeline.add(startEvent);
 
     function p5StartEvent(emitter) {
@@ -217,12 +215,10 @@ class MelodicEmitter {
   }
 
   createAttackEvent(eventConfig, startShift) {
-    var attackEvent = new Tone.Event(time => {
+    var attackEvent = new Tone.ToneEvent(time => {
       let emitter = this;
       toneAttackEvent(eventConfig, time, emitter);
       p5AttackEvent(eventConfig, emitter);
-
-      // console.log('attack', eventConfig.pitch, chroma(emitter.color.current).hsv())
 
       if (emitter.hueIntegration) {
         hueAttackEvent(eventConfig, emitter);
@@ -231,7 +227,8 @@ class MelodicEmitter {
     attackEvent.type = `attack`;
     attackEvent.time = 0;
     attackEvent.pitch = eventConfig.pitch;
-    attackEvent.start(Tone.Time().now() + startShift);
+    attackEvent.start(Tone.now() + startShift);
+
     return attackEvent;
 
     function toneAttackEvent(eventConfig, time, emitter) {
@@ -275,12 +272,10 @@ class MelodicEmitter {
   }
 
   createReleaseEvent(eventConfig, startShift) {
-    let releaseEvent = new Tone.Event(time => {
+    let releaseEvent = new Tone.ToneEvent(time => {
       let emitter = this;
       toneReleaseEvent(emitter);
       p5ReleaseEvent(eventConfig, emitter);
-
-      // console.log('release', eventConfig.pitch, emitter.color.end.h, emitter.color.end.s, emitter.color.end.v)
 
       if (emitter.hueIntegration) {
         hueReleaseEvent(eventConfig, emitter);
@@ -288,7 +283,7 @@ class MelodicEmitter {
     });
     releaseEvent.time = 0;
     releaseEvent.type = `release`;
-    releaseEvent.start(Tone.Time().now() + startShift);
+    releaseEvent.start(Tone.now() + startShift);
 
     return releaseEvent;
 
@@ -353,43 +348,44 @@ class MelodicEmitter {
   }
 
   createCompletedEvent(startShift) {
-    let completedEvent = new Tone.Event(time => {
+    let completedEvent = new Tone.ToneEvent(time => {
       this.active = false;
     });
     completedEvent.time = 0;
     completedEvent.section = `melodic`;
-    completedEvent.start(Tone.Time().now() + startShift);
+    completedEvent.start(Tone.now() + startShift);
     return completedEvent;
   }
 
   generateWave(key) {
-    let waveEventsArray = [];
+    // let waveEventsArray = [];
 
+    // startShift is a running counter that adds 
     let startShift = _.random(
       waveConfig.startShift.min,
       waveConfig.startShift.max
     );
 
     for (let i = 0; i < waveConfig.notesInWave; i++) {
+      // Creates the timing and musicality data that is used by each event in the wave
       let eventConfig = this.generateEventConfig(key);
-      let attackEvent = this.createAttackEvent(eventConfig, startShift);
-      waveEventsArray.push(attackEvent);
+
+      // Schedule the attack for p5, tone, and hue along Tone's timeline
+      this.createAttackEvent(eventConfig, startShift);
+      // waveEventsArray.push(attackEvent);
       startShift += eventConfig.attack + eventConfig.sustain;
       let releaseEvent = this.createReleaseEvent(eventConfig, startShift);
-      waveEventsArray.push(releaseEvent);
+      // waveEventsArray.push(releaseEvent);
       startShift += eventConfig.release + eventConfig.rest;
     }
     let completedEvent = this.createCompletedEvent(startShift);
-    waveEventsArray.push(completedEvent);
+    // waveEventsArray.push(completedEvent);
 
-    return waveEventsArray;
+    // return waveEventsArray;
   }
 
-  scheduleEvents(timeline) {
-    let schedule = this.generateWave(this.key);
-    schedule.forEach(event => {
-      timeline.add(event);
-    });
+  scheduleEvents() {
+    this.generateWave(this.key);
     this.active = true;
   }
 }

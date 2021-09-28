@@ -200,10 +200,10 @@ export default {
     },
     async initTone() {
       Tone = await import(`tone`).then(module => {
-        return module.default;
+        return module;
       });
       this.toneMeta.initialized = true;
-      Tone.Master.mute = true;
+      Tone.Destination.mute = true;
       this.toneMeta.timeline = new Tone.Timeline();
 
       return true;
@@ -275,11 +275,11 @@ export default {
       return true;
     },
     async connectTone() {
-      this.toneMeta.baseToneEmitter.out.connect(this.toneMeta.toneSpace.in);
+      // this.toneMeta.baseToneEmitter.out.connect(this.toneMeta.toneSpace.in);
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
         emitter.voice.lineOut.connect(this.toneMeta.toneSpace.in);
       });
-      this.toneMeta.toneSpace.out.connect(Tone.Master);
+      this.toneMeta.toneSpace.out.connect(Tone.Destination);
     },
     // Generate wave
     async generateUtterance() {
@@ -302,19 +302,17 @@ export default {
         }
       );
 
-      console.log(this.waveMeta.key.name, this.waveMeta.key.tonic);
-
       this.toneMeta.baseToneEmitter.updateKey(this.waveMeta.key);
-      this.toneMeta.baseToneEmitter.scheduleEvents(this.toneMeta.timeline);
+      this.toneMeta.baseToneEmitter.scheduleEvents();
 
       this.toneMeta.melodicToneEmitters.forEach(emitter => {
         emitter.updateKey(this.waveMeta.key);
-        emitter.scheduleEvents(this.toneMeta.timeline);
+        emitter.scheduleEvents();
       });
     },
     async startWave() {
       let timeline = this.toneMeta.timeline;
-      Tone.Master.mute = false;
+      Tone.Destination.mute = false;
       Tone.Transport.start();
       this.waveMeta.activeCard = `performance`;
     },

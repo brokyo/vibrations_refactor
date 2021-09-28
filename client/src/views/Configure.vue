@@ -174,8 +174,10 @@ export default {
 </script>
 
 <style scoped lang="scss">
+@import url('https://fonts.googleapis.com/css2?family=Abel&family=Montserrat&display=swap');
+
 body {
-  font-family: monospace;
+  font-family: 'Monserrat';
 }
 
 .light_container {
